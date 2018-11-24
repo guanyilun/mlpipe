@@ -1,6 +1,7 @@
 import torch
+import numpy as np
 
-def truncate_collate(self, batch):
+def truncate_collate(batch):
     """
     args:
         batch - list of (tensor, label)
@@ -14,7 +15,7 @@ def truncate_collate(self, batch):
 
     # truncate according to min_len
     # stack all
-    X = torch.stack(map(lambda x: x[0][:min_len], batch), dim=0).type(torch.FloatTensor)
-    params = torch.stack(map(lambda x: x[1], batch), dim=0).type(torch.FloatTensor)
-    y = torch.FloatTensor(map(lambda x: x[2], batch))
+    X = np.vstack(map(lambda x: x[0][:min_len], batch))
+    params = np.vstack(map(lambda x: x[1], batch))
+    y = np.array(map(lambda x: x[2], batch))
     return X, params, y
