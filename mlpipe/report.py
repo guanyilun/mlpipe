@@ -6,7 +6,10 @@ from tabulate import tabulate
 
 class Report(object):
     def __init__(self):
-        self.report = pd.Dataframe()
+        
+        columns = ['epoch', 'batch', 'model', 'loss', 'accuracy', 'precision',
+                   'recall', 'f1']
+        self.report = pd.DataFrame(columns=columns)
 
     def add_record(self, model_name, epoch, batch, predict, truth):
         loss = metrics.log_loss(truth, predict)
@@ -15,18 +18,17 @@ class Report(object):
         recall = metrics.recall_score(truth, predict)
         f1 = metrics.f1_score(truth, predict, average='binary')
 
-        mini_report = pd.Dataframe([epoch, batch, model_name, loss, accuracy,
-                                    precision, recall, f1])
-                                   
-        mini_report.columns = ['epoch', 'batch', 'model', 'loss', 'accuracy',
-                               'precision', 'recall', 'f1']
-
-        self.report.append(mini_report, ignore_index=True)
+        next_index = len(self.report.index)
+        
+        self.report.loc[next_index] = [epoch, batch, model_name, loss, accuracy,
+                                       precision, recall, f1]
                                    
     def print_batch_report(self, epoch, batch):
         report = self.report
-        mini_report = report[[report.epoch == epoch & report.batch == batch]]
+        mini_report = report[(report.epoch == epoch) & (report.batch == batch)]
+        print('')
         print(tabulate(mini_report, headers='keys', tablefmt='pqsl'))
+        print('')
     
                                    
                                    

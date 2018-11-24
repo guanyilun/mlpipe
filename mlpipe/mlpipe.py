@@ -42,7 +42,7 @@ class MLPipe(object):
 
         # specify parameters used for DataLoader
         loader_params = {
-            'batch_size': 32,
+            'batch_size': 128,
             'shuffle': True,
             'num_workers': 1,
             'collate_fn': self.collate_fn
@@ -95,8 +95,6 @@ class MLPipe(object):
         for name in self._models.keys():
             model = self._models[name]
             model.cleanup()
-
-    def report_performance(self, epoch, batch_num, predict, truth):
         
         
 class Model(object):
