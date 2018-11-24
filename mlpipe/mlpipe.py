@@ -8,12 +8,16 @@ from torch.utils.data import DataLoader
 from sklearn import metrics
 from data import Dataset, truncate_collate
 
+from report import Report
+
+
 class MLPipe(object):
     def __init__(self):
         self._epochs = 1
         self._models = dict()
         self.collate_fn = truncate_collate
         self._param_keys = None
+        self._report = Report()
 
     def set_epochs(self, epochs):
         self._epochs = epochs
@@ -68,8 +72,11 @@ class MLPipe(object):
 
                     # if there is an output that's not none
                     if len(output) > 0:
-                        if (i % 100 == 0):
-                            self.report_performance(epoch, i, output, labels)
+                        self._report.add_record(name, epoch, i, output, labels)
+
+                    if i % 100 == 0:
+                        self._report.print_batch_report(epoch, i)
+                        
                         
         # test all models
         for i, (batch, params, labels) in enumerate(test_loader):
@@ -90,17 +97,7 @@ class MLPipe(object):
             model.cleanup()
 
     def report_performance(self, epoch, batch_num, predict, truth):
-        loss = metrics.log_loss(truth, predict)
-        accuracy = metrics.accuracy_score(truth, predict)
-        precision = metrics.precision_score(truth, predict)
-        recall = metrics.recall_score(truth, predict)
-        f1 = metrics.f1_score(truth, predict, average='binary')
-        print('EPOCH {} BATCH {}'.format(epoch, batch_num))
-        print('  loss: \t\t{}'.format(loss))
-        print('  accuracy: \t\t{}'.format(accuracy))
-        print('  precision: \t\t{}'.format(precision))
-        print('  recall: \t\t{}'.format(recall))
-        print('  f1 score: \t\t{}'.format(f1))
+        
         
 class Model(object):
 
