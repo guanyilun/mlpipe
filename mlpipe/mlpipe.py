@@ -14,6 +14,7 @@ class MLPipe(object):
         self._epochs = 1
         self._models = dict()
         self.collate_fn = truncate_collate
+        self._param_keys = None
 
     def set_epochs(self, epochs):
         self._epochs = epochs
@@ -25,6 +26,10 @@ class MLPipe(object):
         if os.path.isfile(src):
             self._train_set = Dataset(src=src, label='train')
             self._test_set = Dataset(src=src, label='test')
+
+            # retrieve parameter keys
+            self._param_keys = self._train_set.param_keys
+
         else:
             raise IOError("Dataset provided is not found!")
 
@@ -32,10 +37,11 @@ class MLPipe(object):
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
 
+        # specify parameters used for DataLoader
         loader_params = {
             'batch_size': 32,
             'shuffle': True,
-            'num_workers': 1,
+            'num_workers': 4,
             'collate_fn': self.collate_fn
         }
 
@@ -54,9 +60,11 @@ class MLPipe(object):
                     model = self._models[name]
                     metadata = {
                         'batch_id': i,
-                        'params': params,
                         'device': device
                     }
+                    for i, k in enumerate(self._param_keys):
+                        metadata[k] = params[:, i]
+
                     model.train(batch, labels, metadata)
 
         # test all models
@@ -66,9 +74,11 @@ class MLPipe(object):
                 model = self._models[name]
                 metadata = {
                     'batch_id': i,
-                    'params': params,
                     'device': device
                 }
+                for i, k in enumerate(self._param_keys):
+                    metadata[k] = params[:, i]
+
                 predictions = model.test(batch, labels, metadata)
                 loss = criterion(predictions, labels)
 

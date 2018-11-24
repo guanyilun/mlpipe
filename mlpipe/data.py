@@ -40,6 +40,7 @@ class Dataset(data.Dataset):
         return X, params, y
 
 
+
 def truncate_collate(batch):
     """
     args:
