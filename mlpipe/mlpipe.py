@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """Main module."""
-
+from __future__ import print_function
 import os
 import torch
-
-from data import Dataset, truncate_collate
 from torch.utils.data import DataLoader
-
+from sklearn import metrics
+from data import Dataset, truncate_collate
 
 class MLPipe(object):
     def __init__(self):
@@ -41,7 +40,7 @@ class MLPipe(object):
         loader_params = {
             'batch_size': 32,
             'shuffle': True,
-            'num_workers': 4,
+            'num_workers': 1,
             'collate_fn': self.collate_fn
         }
 
@@ -62,13 +61,17 @@ class MLPipe(object):
                         'batch_id': i,
                         'device': device
                     }
-                    for i, k in enumerate(self._param_keys):
-                        metadata[k] = params[:, i]
+                    for idx, k in enumerate(self._param_keys):
+                        metadata[k] = params[:, idx]
 
-                    model.train(batch, labels, metadata)
+                    output = model.train(batch, labels, metadata)
 
+                    # if there is an output that's not none
+                    if len(output) > 0:
+                        if (i % 100 == 0):
+                            self.report_performance(epoch, i, output, labels)
+                        
         # test all models
-        criterion = nn.CrossEntropyLoss()
         for i, (batch, params, labels) in enumerate(test_loader):
             for name in self._models.keys():
                 model = self._models[name]
@@ -76,19 +79,29 @@ class MLPipe(object):
                     'batch_id': i,
                     'device': device
                 }
-                for i, k in enumerate(self._param_keys):
-                    metadata[k] = params[:, i]
+                for idx, k in enumerate(self._param_keys):
+                    metadata[k] = params[:, idx]
 
                 predictions = model.test(batch, labels, metadata)
-                loss = criterion(predictions, labels)
-
 
         # clean up the memory
         for name in self._models.keys():
             model = self._models[name]
             model.cleanup()
 
-
+    def report_performance(self, epoch, batch_num, predict, truth):
+        loss = metrics.log_loss(truth, predict)
+        accuracy = metrics.accuracy_score(truth, predict)
+        precision = metrics.precision_score(truth, predict)
+        recall = metrics.recall_score(truth, predict)
+        f1 = metrics.f1_score(truth, predict, average='binary')
+        print('EPOCH {} BATCH {}'.format(epoch, batch_num))
+        print('  loss: \t\t{}'.format(loss))
+        print('  accuracy: \t\t{}'.format(accuracy))
+        print('  precision: \t\t{}'.format(precision))
+        print('  recall: \t\t{}'.format(recall))
+        print('  f1 score: \t\t{}'.format(f1))
+        
 class Model(object):
 
     name = ""

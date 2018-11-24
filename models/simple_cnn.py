@@ -69,12 +69,14 @@ class CNNModel(Model):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        _, predicted = torch.max(outputs, 1)
+        return predicted.cpu().numpy()
         
     def test(data, labels, metedata):
         gpu = self.device
         data = torch.from_numpy(data[:,None,:]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
         data, labels = data.to(gpu), labels.to(gpu)
-
-        return self.model(data).numpy()
-
+        outputs = self.model(data)
+        _, predicted = torch.max(outputs, 1)
+        return predicted.cpu().numpy()
