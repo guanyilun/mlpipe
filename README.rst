@@ -3,9 +3,6 @@ MLPipe
 ======
 
 
-.. image:: https://img.shields.io/pypi/v/mlpipe.svg
-        :target: https://pypi.python.org/pypi/mlpipe
-
 .. image:: https://img.shields.io/travis/guanyilun/mlpipe.svg
         :target: https://travis-ci.org/guanyilun/mlpipe
 

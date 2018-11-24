@@ -52,12 +52,14 @@ class CNNModel(Model):
         # Loss and optimizer
         learning_rate = 0.01
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
+
+        self.optimizer = torch.optim.Adam(self.model.parameters(),
+                                          lr=learning_rate)
 
     def train(self, data, labels, metadata):
         gpu = self.device
 
-        data = torch.from_numpy(data[:,None,:]).type(torch.FloatTensor)
+        data = torch.from_numpy(data[:,None,::10]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
         data, labels = data.to(gpu), labels.to(gpu)
 
