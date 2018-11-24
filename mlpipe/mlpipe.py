@@ -6,6 +6,7 @@ import os
 import torch
 
 from data import Dataset, truncate_collate
+from torch.utils.data import DataLoader
 
 
 class MLPipe(object):
@@ -17,10 +18,10 @@ class MLPipe(object):
     def set_epochs(self, epochs):
         self._epochs = epochs
 
-    def add_model(model):
+    def add_model(self, model):
         self._models[model.name] = model
         
-    def set_dataset(src):
+    def set_dataset(self, src):
         if os.path.isfile(src):
             self._train_set = Dataset(src=src, label='train')
             self._test_set = Dataset(src=src, label='test')
@@ -34,21 +35,23 @@ class MLPipe(object):
         loader_params = {
             'batch_size': 32,
             'shuffle': True,
-            'num_workers': 4,
+            'num_workers': 1,
             'collate_fn': self.collate_fn
         }
 
-        train_loader = DataLoder(self._train_set, **loader_params)
-        test_loader = DataLoder(self._test_set, **loader_params))
+        train_loader = DataLoader(self._train_set, **loader_params)
+        test_loader = DataLoader(self._test_set, **loader_params)
 
         # setup all models
-        for (k, model) in enumerate(self._models):
+        for name in self._models.keys():
+            model = self._models[name]
             model.setup(device)
 
         # train all models
         for epoch in range(self._epochs):
             for i, (batch, params, labels) in enumerate(train_loader):
-                for (k, model) in enumerate(self._models):
+                for name in self._models.keys():
+                    model = self._models[name]
                     metadata = {
                         'batch_id': i,
                         'params': params,
@@ -59,7 +62,8 @@ class MLPipe(object):
         # test all models
         criterion = nn.CrossEntropyLoss()
         for i, (batch, params, labels) in enumerate(test_loader):
-            for (k, model) in enumerate(self._models):
+            for name in self._models.keys():
+                model = self._models[name]
                 metadata = {
                     'batch_id': i,
                     'params': params,
@@ -70,7 +74,8 @@ class MLPipe(object):
 
 
         # clean up the memory
-        for (k, model) in enumerate(self._models):
+        for name in self._models.keys():
+            model = self._models[name]
             model.cleanup()
 
 

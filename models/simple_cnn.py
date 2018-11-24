@@ -52,12 +52,13 @@ class CNNModel(Model):
         # Loss and optimizer
         learning_rate = 0.01
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
-    def train(data, labels, metadata):
+    def train(self, data, labels, metadata):
         gpu = self.device
 
         data = torch.from_numpy(data[:,None,:]).type(torch.FloatTensor)
+        labels = torch.from_numpy(labels)
         data, labels = data.to(gpu), labels.to(gpu)
 
         # Model computations
@@ -70,7 +71,9 @@ class CNNModel(Model):
         self.optimizer.step()
         
     def test(data, labels, metedata):
+        gpu = self.device
         data = torch.from_numpy(data[:,None,:]).type(torch.FloatTensor)
+        labels = torch.from_numpy(labels)
         data, labels = data.to(gpu), labels.to(gpu)
 
         return self.model(data).numpy()
