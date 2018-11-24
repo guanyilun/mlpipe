@@ -71,12 +71,12 @@ class MLPipe(object):
                     output = model.train(batch, labels, metadata)
 
                     # if there is an output that's not none
-                    if len(output) > 0:
+                    if len(output) > 0 and i % 100 == 0:
                         self._report.add_record(name, epoch, i, output, labels)
 
-                    if i % 100 == 0:
-                        self._report.print_batch_report(epoch, i)
-                        
+                if i % 100 == 0:
+                    self._report.print_batch_report(epoch, i)
+        
                         
         # test all models
         for i, (batch, params, labels) in enumerate(test_loader):
