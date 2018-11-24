@@ -27,7 +27,7 @@ class Report(object):
         report = self.report
         mini_report = report[(report.epoch == epoch) & (report.batch == batch)]
         print('')
-        print(tabulate(mini_report, headers='keys', tablefmt='pqsl'))
+        print(tabulate(mini_report, headers='keys', tablefmt='pqsl', showindex=False))
         print('')
     
                                    
