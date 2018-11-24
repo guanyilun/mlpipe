@@ -4,58 +4,24 @@
 
 import os
 import torch
-from torch.utils import data
-import h5py
-import numpy as np
-import utils
 
-class Dataset(data.Dataset):
-    'Wrapper for TOD data PyTorch'
-    def __init__(self, src, label):
-        'Initialization'
-        self._label = label
-        self._hf = h5py.File(src, 'r')
-        self._group = self._hf[label]
-        self._keys = self._group.keys()
+from data import Dataset, truncate_collate
+from torch.utils.data import DataLoader
 
-        self.param_keys = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                           'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
-                           'jumpLive', 'gainLive']
-
-    def __len__(self):
-        'Denotes the total number of samples'
-        return len(self._keys)
-
-    def __getitem__(self, index):
-        'Generates one sample of data'
-        # Select sample
-        det_uid = self._keys[index]
-
-        # Load data and get label
-        dataset = self._group[det_uid]
-        X = dataset[:]
-        # sort in specific order
-        y = dataset.attrs['label']
-
-        # load pickle parameters
-        params = np.zeros(len(self.param_keys))
-        for i, key in enumerate(self.param_keys):
-            params[i] = dataset.attrs[key]
-        
-        return X, params, y
 
 class MLPipe(object):
     def __init__(self):
         self._epochs = 1
         self._models = dict()
+        self.collate_fn = truncate_collate
 
     def set_epochs(self, epochs):
         self._epochs = epochs
 
-    def add_model(model):
+    def add_model(self, model):
         self._models[model.name] = model
         
-    def set_dataset(src):
+    def set_dataset(self, src):
         if os.path.isfile(src):
             self._train_set = Dataset(src=src, label='train')
             self._test_set = Dataset(src=src, label='test')
@@ -63,36 +29,71 @@ class MLPipe(object):
             raise IOError("Dataset provided is not found!")
 
     def run(self):
+        use_cuda = torch.cuda.is_available()
+        device = torch.device("cuda:0" if use_cuda else "cpu")
+
         loader_params = {
             'batch_size': 32,
             'shuffle': True,
-            'num_workers': 4,
-            'collate_fn': self._get_collate_fn()
+            'num_workers': 1,
+            'collate_fn': self.collate_fn
         }
-        train_loader = DataLoder(self._train_set, **loader_params)
-        test_loader = DataLoder(self._test_set, **loader_params))
+
+        train_loader = DataLoader(self._train_set, **loader_params)
+        test_loader = DataLoader(self._test_set, **loader_params)
 
         # setup all models
-        for (k, model) in enumerate(self._models):
-            model.setup()
+        for name in self._models.keys():
+            model = self._models[name]
+            model.setup(device)
 
         # train all models
         for epoch in range(self._epochs):
-            for i, (dets, params, labels) in enumerate(train_loader):
-                for (k, model) in enumerate(self._models):
-                    model.train(i, dets, params, labels)
+            for i, (batch, params, labels) in enumerate(train_loader):
+                for name in self._models.keys():
+                    model = self._models[name]
+                    metadata = {
+                        'batch_id': i,
+                        'params': params,
+                        'device': device
+                    }
+                    model.train(batch, labels, metadata)
 
         # test all models
         criterion = nn.CrossEntropyLoss()
-        for i, (dets, params, labels) in enumerate(test_loader):
-            for (k, model) in enumerate(self._models):
-                predictions = model.test(i, dets, params, labels)
+        for i, (batch, params, labels) in enumerate(test_loader):
+            for name in self._models.keys():
+                model = self._models[name]
+                metadata = {
+                    'batch_id': i,
+                    'params': params,
+                    'device': device
+                }
+                predictions = model.test(batch, labels, metadata)
                 loss = criterion(predictions, labels)
 
+
         # clean up the memory
-        for (k, model) in enumerate(self._models):
+        for name in self._models.keys():
+            model = self._models[name]
             model.cleanup()
 
-    def _get_collate_fn(self):
-        return utils.truncate_collate
 
+class Model(object):
+
+    name = ""
+
+    def __init__(self):
+        pass
+
+    def setup(self, device):
+        pass
+
+    def train(self, batch, labels, metadata):
+        raise RuntimeError("This method needs to be overridden!")
+
+    def test(self, batch, labels, metadata):
+        raise RuntimeError("This method needs to be overridden!")
+
+    def cleanup(self):
+        pass
