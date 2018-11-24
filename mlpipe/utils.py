@@ -1,50 +1,21 @@
 import torch
+import numpy as np
 
-def pad_tensor(vec, pad, dim):
+def truncate_collate(batch):
     """
     args:
-        vec - tensor to pad
-        pad - the size to pad to
-        dim - dimension to pad
+        batch - list of (tensor, label)
 
     return:
-        a new tensor padded to 'pad' in dimension 'dim'
+        xs - a tensor of all examples in 'batch' after padding
+        ys - a LongTensor of all labels in batch
     """
-    pad_size = list(vec.shape)
-    pad_size[dim] = pad - vec.size(dim)
-    return torch.cat([vec, torch.zeros(*pad_size)], dim=dim)
+    # find shortest sequence
+    min_len = min([len(b[0]) for b in batch])
 
-
-class PadCollate:
-    """
-    a variant of callate_fn that pads according to the longest sequence in
-    a batch of sequences
-    """
-
-    def __init__(self, dim=0):
-        """
-        args:
-            dim - the dimension to be padded (dimension of time in sequences)
-        """
-        self.dim = dim
-
-    def pad_collate(self, batch):
-        """
-        args:
-            batch - list of (tensor, label)
-
-        reutrn:
-            xs - a tensor of all examples in 'batch' after padding
-            ys - a LongTensor of all labels in batch
-        """
-        min_len = min([len(b[0]) for b in batch])
-        # find longest sequence
-                      
-        # pad according to max_len
-        # stack all
-        xs = torch.stack(map(lambda x: x[0][:min_len], batch), dim=0)
-        ys = torch.LongTensor(map(lambda x: x[1], batch))
-        return xs, ys
-
-    def __call__(self, batch):
-        return self.pad_collate(batch)
+    # truncate according to min_len
+    # stack all
+    X = np.vstack(map(lambda x: x[0][:min_len], batch))
+    params = np.vstack(map(lambda x: x[1], batch))
+    y = np.array(map(lambda x: x[2], batch))
+    return X, params, y

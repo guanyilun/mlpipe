@@ -1,23 +1,26 @@
 import torch
 from torch.utils import data
-from main import Dataset
 from torch import nn
 import torch.nn.functional as F
+from mlpipe import Dataset
+from utils import truncate_collate
 
 # CUDA for PyTorch
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 
 # Parameters
-params = {'batch_size': 1,
-          'shuffle': True,
-          'num_workers': 1,
-          }
+params = {
+    'batch_size': 32,
+    'shuffle': True,
+    'num_workers': 1,
+    'collate_fn': truncate_collate
+}
 max_epochs = 100
 
 
 # Generators
-training_set = Dataset(src='data/dataset.h5', label='train')
+training_set = Dataset(src='../data/dataset.h5', label='train')
 training_generator = data.DataLoader(training_set, **params)
 
 # Fully connected neural network with one hidden layer
@@ -63,13 +66,14 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 # Loop over epochs
 for epoch in range(max_epochs):
     # Training
-    for i, (local_batch, local_labels) in enumerate(training_generator):
+    for i, (dets, params, labels) in enumerate(training_generator):
+        print dets, params, labels
         # Transfer to GPU
-        local_batch, local_labels = local_batch.to(device), local_labels.to(device)
-
+        # dets, params, labels = dets.to(device), params.to(device)
+        dets, labels = dets.to(device), labels.to(device)
         # Model computations
-        outputs = model(local_batch)
-        loss = criterion(outputs, local_labels)
+        outputs = model(dets)
+        loss = criterion(outputs, labels)
         
         # Backward and optimize
         optimizer.zero_grad()
