@@ -41,7 +41,7 @@ class MLPipe(object):
     def set_train_batch_size(self, batch_size):
         self._train_batch_size = int(batch_size)
 
-    def set_validate_batch_size(self, batch_size)
+    def set_validate_batch_size(self, batch_size):
         self._validate_batch_size = int(batch_size)
 
     def set_validate_interval(self, interval):
@@ -136,6 +136,7 @@ class MLPipe(object):
             self._report.add_record(name, self._epoch, self._batch, y_pred, y_truth)
 
         # print a intermediate result
+        print('== VALIDATION RESULTS: ==')        
         self._report.print_batch_report(self._epoch, self._batch)
 
     def test(self):

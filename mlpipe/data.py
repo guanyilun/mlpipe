@@ -31,10 +31,10 @@ class Dataset(data.Dataset):
         dataset = self._group[det_uid]
 
         # see if one needs data, if not X will simply be a placeholder
-        if self._load_data
+        if self._load_data:
             X = dataset[:]
         else:  
-            X = 0
+            X = [0]
         # sort in specific order
         y = dataset.attrs['label']
 
@@ -59,8 +59,6 @@ class Dataset(data.Dataset):
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
         
-
-
 
 def truncate_collate(batch):
     """
