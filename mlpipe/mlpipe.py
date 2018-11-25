@@ -157,9 +157,9 @@ class MLPipe(object):
         print('== TEST RESULTS: ==')
         self._report.print_batch_report(-1, 0)
 
-    def save(self, path)
+    def save(self, path):
         # create folder if not existing
-        if !os.path.isfile(path):
+        if not os.path.exists(path):
             print('Path: {} does not exist, creating now ...'.format(path))
             os.makedirs(path)
 
@@ -177,6 +177,7 @@ class MLPipe(object):
         for name in self._models.keys():
             model = self._models[name]
             model.clean()
+
 
 class Model(object):
 

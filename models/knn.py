@@ -9,11 +9,10 @@ class KNNModel(Model):
 
     name = "KNNModel"
 
-    def __init__(self):
+    def __init__(self, n_neighbors=7):
         Model.__init__(self)
-        
-    def setup(self, device):
-        self.knn = KNeighborsClassifier(n_neighbors=7)
+        self.knn = KNeighborsClassifier(n_neighbors=n_neighbors)
+        self.name = '{}-{}'.format(self.name, n_neighbors)
 
     def train(self, data, labels, metadata):
         corrLive = metadata['corrLive'][:,None]
@@ -35,5 +34,6 @@ class KNNModel(Model):
         return prediction
 
     def save(self, filename):
-        pickle.dump(self.knn, filename)
+        with open(filename, 'wb') as f:
+            pickle.dump(self.knn, f, protocol=pickle.HIGHEST_PROTOCOL)
 
