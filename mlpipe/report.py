@@ -32,7 +32,8 @@ class Report(object):
         print(tabulate(mini_report, headers='keys', tablefmt='pqsl', showindex=False))
         print('')
     
-                                   
+    def save(self, fname):
+        self.report.to_pickle(fname)
                                    
                                    
                                    
