@@ -15,20 +15,20 @@ class KNNModel(Model):
         self.name = '{}-{}'.format(self.name, n_neighbors)
 
     def train(self, data, labels, metadata):
-        corrLive = metadata['corrLive'][:,None]
-        rmsLive = metadata['rmsLive'][:,None]
-        kurtLive = metadata['kurtLive'][:,None]
-        skewLive = metadata['skewLive'][:,None]
-        normLive = metadata['normLive'][:,None]
+        corrLive = metadata['corrLive']
+        rmsLive = metadata['rmsLive']
+        kurtLive = metadata['kurtLive']
+        skewLive = metadata['skewLive']
+        normLive = metadata['normLive']
         features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
         self.knn.fit(features, labels)
     
     def validate(self, data, labels, metadata):
-        corrLive = metadata['corrLive'][:,None]
-        rmsLive = metadata['rmsLive'][:,None]
-        kurtLive = metadata['kurtLive'][:,None]
-        skewLive = metadata['skewLive'][:,None]
-        normLive = metadata['normLive'][:,None]
+        corrLive = metadata['corrLive']
+        rmsLive = metadata['rmsLive']
+        kurtLive = metadata['kurtLive']
+        skewLive = metadata['skewLive']
+        normLive = metadata['normLive']
         features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
         prediction = self.knn.predict(features)
         return prediction

@@ -77,7 +77,7 @@ class MLPipe(object):
                     model = self._models[name]
                     metadata = {}
                     for idx, k in enumerate(self._param_keys):
-                        metadata[k] = params[:, idx]
+                        metadata[k] = params[:, idx][:, None]
 
                     model.train(batch, label, metadata)
 
@@ -105,7 +105,7 @@ class MLPipe(object):
                 model = self._models[name]
                 metadata = {}
                 for idx, k in enumerate(self._param_keys):
-                    metadata[k] = params[:, idx]
+                    metadata[k] = params[:, idx][:, None]
 
                 prediction = model.validate(batch, label, metadata)
 
@@ -141,7 +141,7 @@ class MLPipe(object):
                 model = self._models[name]
                 metadata = {}
                 for idx, k in enumerate(self._param_keys):
-                    metadata[k] = params[:, idx]
+                    metadata[k] = params[:, idx][:, None]
 
                 prediction = model.validate(batch, label, metadata)
 

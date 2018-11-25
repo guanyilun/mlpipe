@@ -41,7 +41,7 @@ The rest of dependencies can be installed by
 
    pip install -r requirements.txt
 
-The script assumes you have the required data file ``dataset.h5`` file located at ``data`` directory. On Feynman you can do the following, at the project root
+The script assumes you have the required data file ``dataset.h5`` located at the ``data`` directory. On Feynman you can do the following - at the project root
 
 .. code-block:: bash
 
@@ -53,11 +53,12 @@ Features
 --------
 
 * Train and test machine learning models in a uniform way
+* Handles random sampling of detector data and pickle parameters
 * Build-in weighted sampler to ensure training data are balanced
 * Uniform metrics comparison of different models
 * Automatically generate pandas report and save it for post process
 * Expose GPU for easier GPU acceleration
-* It replies on data from HDF5 file which is faster than reading from moby2
+* Read data from an HDF5 file which is faster than from moby2 and more scalable
 
 Sample outputs
 -------
