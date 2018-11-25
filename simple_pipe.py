@@ -5,7 +5,12 @@ from models.knn import KNNModel
 pipe = MLPipe()
 pipe.set_epochs(1)
 pipe.set_dataset('data/dataset.h5')
+
+
+
 pipe.add_model(CNNModel())
 pipe.add_model(KNNModel())
-pipe.run()
+pipe.train()
 pipe.test()
+pipe.save()
+pipe.clean()

@@ -14,6 +14,8 @@ from report import Report
 class MLPipe(object):
     def __init__(self):
         self._epochs = 1
+        self._batch_size = 128
+        self._validate_interval = 100
         self._models = dict()
         self.collate_fn = truncate_collate
         self._param_keys = None
@@ -25,12 +27,18 @@ class MLPipe(object):
         self._epoch = 0  
         self._batch = 0
 
+    def add_model(self, model):
+        self._models[model.name] = model
+
     def set_epochs(self, epochs):
         self._epochs = epochs
 
-    def add_model(self, model):
-        self._models[model.name] = model
+    def set_batch_size(self, batch_size):
+        self._batch_size = batch_size
         
+    def set_validate_interval(self, interval):
+        self._validate_interval = int(interval)
+
     def set_dataset(self, src):
         if os.path.isfile(src):
             self._train_set = Dataset(src=src, label='train')
@@ -43,13 +51,13 @@ class MLPipe(object):
         else:
             raise IOError("Dataset provided is not found!")
 
-    def run(self):
+    def train(self):
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
 
         # specify parameters used for train loader
         loader_params = {
-            'batch_size': 128,
+            'batch_size': self._batch_size,
             'sampler': self._train_set.get_sampler(),
             'collate_fn': self.collate_fn
         }
@@ -67,27 +75,18 @@ class MLPipe(object):
                 self._batch = i
                 for name in self._models.keys():
                     model = self._models[name]
-                    metadata = {
-                        'batch_id': i,
-                        'device': device
-                    }
+                    metadata = {}
                     for idx, k in enumerate(self._param_keys):
                         metadata[k] = params[:, idx]
 
                     model.train(batch, label, metadata)
 
-                if i % 100 == 0:
+                if i % self._validate_interval == 0:
                     self.validate()
-        
-        # clean up the memory
-        for name in self._models.keys():
-            model = self._models[name]
-            model.cleanup()
 
     def validate(self):
-        sampler = self._validate_set.get_sampler()
         loader_params = {
-            'batch_size': 128,
+            'batch_size': self._batch_size,
             'shuffle': False,
             'collate_fn': self.collate_fn
         }
@@ -123,7 +122,7 @@ class MLPipe(object):
 
     def test(self):
         loader_params = {
-            'batch_size': 128,
+            'batch_size': self._batch_size,
             'shuffle': False,
             'collate_fn': self.collate_fn
         }
@@ -158,6 +157,27 @@ class MLPipe(object):
         print('== TEST RESULTS: ==')
         self._report.print_batch_report(-1, 0)
 
+    def save(self, path)
+        # create folder if not existing
+        if !os.path.isfile(path):
+            print('Path: {} does not exist, creating now ...'.format(path))
+            os.makedirs(path)
+
+        # save each model
+        for name in self._models.keys():
+            model = self._models[name]
+            filename = os.path.join(path, name+'.pickle')
+            model.save(filename)
+
+        # save report
+        report_filename = os.path.join(path, 'report.pickle')
+        self._report.save(report_filename)
+
+    def clean(self):
+        for name in self._models.keys():
+            model = self._models[name]
+            model.clean()
+
 class Model(object):
 
     name = ""
@@ -171,8 +191,11 @@ class Model(object):
     def train(self, batch, labels, metadata):
         raise RuntimeError("This method needs to be overridden!")
 
-    def test(self, batch, labels, metadata):
+    def validate(self, batch, labels, metadata):
         raise RuntimeError("This method needs to be overridden!")
 
-    def cleanup(self):
+    def save(self, filename):
+        pass
+
+    def clean(self):
         pass

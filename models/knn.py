@@ -1,5 +1,6 @@
 from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
+import cPickle as pickle
 
 from mlpipe import Model
 
@@ -32,4 +33,7 @@ class KNNModel(Model):
         features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
         prediction = self.knn.predict(features)
         return prediction
+
+    def save(self, filename):
+        pickle.dump(self.knn, filename)
 

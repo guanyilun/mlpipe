@@ -80,3 +80,7 @@ class CNNModel(Model):
         outputs = self.model(data)
         _, predicted = torch.max(outputs, 1)
         return predicted.cpu().numpy()
+
+
+    def save(self, filename):
+        torch.save(self.model, filename)
