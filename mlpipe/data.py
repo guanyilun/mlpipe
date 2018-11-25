@@ -6,12 +6,13 @@ import numpy as np
 
 class Dataset(data.Dataset):
     'Wrapper for TOD data PyTorch'
-    def __init__(self, src, label):
+    def __init__(self, src, label, load_data=True):
         'Initialization'
         self._label = label
         self._hf = h5py.File(src, 'r', swmr=True)
         self._group = self._hf[label]
         self._keys = self._group.keys()
+        self._load_data = load_data
 
         self.param_keys = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
                            'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
@@ -23,12 +24,17 @@ class Dataset(data.Dataset):
 
     def __getitem__(self, index):
         'Generates one sample of data'
-        # Select sample
+        # select sample
         det_uid = self._keys[index]
 
-        # Load data and get label
+        # load data and get label
         dataset = self._group[det_uid]
-        X = dataset[:]
+
+        # see if one needs data, if not X will simply be a placeholder
+        if self._load_data:
+            X = dataset[:]
+        else:  
+            X = [0]
         # sort in specific order
         y = dataset.attrs['label']
 
@@ -53,8 +59,6 @@ class Dataset(data.Dataset):
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
         
-
-
 
 def truncate_collate(batch):
     """
