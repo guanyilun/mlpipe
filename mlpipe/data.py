@@ -9,7 +9,7 @@ class Dataset(data.Dataset):
     def __init__(self, src, label):
         'Initialization'
         self._label = label
-        self._hf = h5py.File(src, 'r')
+        self._hf = h5py.File(src, 'r', swmr=True)
         self._group = self._hf[label]
         self._keys = self._group.keys()
 
@@ -38,6 +38,21 @@ class Dataset(data.Dataset):
             params[i] = dataset.attrs[key]
         
         return X, params, y
+
+    def get_sampler(self):
+        n_keys = len(self._keys)
+        
+        labels = [self._group[self._keys[i]].attrs['label'] for i in range(n_keys)]
+        n_good = np.sum(labels)
+        n_bad = n_keys - n_good
+
+        w_good = n_bad * 1.0 / n_keys
+        w_bad = n_good * 1.0 / n_keys
+
+        weights = map(lambda l: w_good if l == 0 else w_bad, labels)
+        sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
+        return sampler
+        
 
 
 

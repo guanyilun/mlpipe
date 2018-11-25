@@ -49,9 +49,8 @@ class MLPipe(object):
 
         # specify parameters used for train loader
         loader_params = {
-            'batch_size': 1024,
-            'shuffle': True,
-            'num_workers': 0,
+            'batch_size': 128,
+            'sampler': self._train_set.get_sampler(),
             'collate_fn': self.collate_fn
         }
         train_loader = DataLoader(self._train_set, **loader_params)
@@ -87,9 +86,8 @@ class MLPipe(object):
 
     def validate(self):        
         loader_params = {
-            'batch_size': 1024,
+            'batch_size': 128,
             'shuffle': False,
-            'num_workers': 0,
             'collate_fn': self.collate_fn
         }
         validate_loader = DataLoader(self._validate_set, **loader_params)
@@ -127,7 +125,6 @@ class MLPipe(object):
         loader_params = {
             'batch_size': 128,
             'shuffle': False,
-            'num_workers': 0,
             'collate_fn': self.collate_fn
         }
         test_loader = DataLoader(self._test_set, **loader_params)
