@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Main module."""
 from __future__ import print_function
 import os
@@ -9,6 +8,7 @@ from sklearn import metrics
 from data import Dataset, truncate_collate
 
 from report import Report
+import numpy as np
 
 
 class MLPipe(object):
@@ -17,7 +17,13 @@ class MLPipe(object):
         self._models = dict()
         self.collate_fn = truncate_collate
         self._param_keys = None
+
+        # performance reporting
         self._report = Report()
+
+        # internal counter for epoch and batch id
+        self._epoch = 0  
+        self._batch = 0
 
     def set_epochs(self, epochs):
         self._epochs = epochs
@@ -28,6 +34,7 @@ class MLPipe(object):
     def set_dataset(self, src):
         if os.path.isfile(src):
             self._train_set = Dataset(src=src, label='train')
+            self._validate_set = Dataset(src=src, label='validate')
             self._test_set = Dataset(src=src, label='test')
 
             # retrieve parameter keys
@@ -40,16 +47,14 @@ class MLPipe(object):
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
 
-        # specify parameters used for DataLoader
+        # specify parameters used for train loader
         loader_params = {
-            'batch_size': 128,
+            'batch_size': 1024,
             'shuffle': True,
-            'num_workers': 1,
+            'num_workers': 0,
             'collate_fn': self.collate_fn
         }
-
         train_loader = DataLoader(self._train_set, **loader_params)
-        test_loader = DataLoader(self._test_set, **loader_params)
 
         # setup all models
         for name in self._models.keys():
@@ -58,7 +63,9 @@ class MLPipe(object):
 
         # train all models
         for epoch in range(self._epochs):
-            for i, (batch, params, labels) in enumerate(train_loader):
+            self._epoch = epoch
+            for i, (batch, params, label) in enumerate(train_loader):
+                self._batch = i
                 for name in self._models.keys():
                     model = self._models[name]
                     metadata = {
@@ -68,18 +75,64 @@ class MLPipe(object):
                     for idx, k in enumerate(self._param_keys):
                         metadata[k] = params[:, idx]
 
-                    output = model.train(batch, labels, metadata)
-
-                    # if there is an output that's not none
-                    if len(output) > 0 and i % 100 == 0:
-                        self._report.add_record(name, epoch, i, output, labels)
+                    model.train(batch, label, metadata)
 
                 if i % 100 == 0:
-                    self._report.print_batch_report(epoch, i)
+                    self.validate()
         
-                        
+        # clean up the memory
+        for name in self._models.keys():
+            model = self._models[name]
+            model.cleanup()
+
+    def validate(self):        
+        loader_params = {
+            'batch_size': 1024,
+            'shuffle': False,
+            'num_workers': 0,
+            'collate_fn': self.collate_fn
+        }
+        validate_loader = DataLoader(self._validate_set, **loader_params)
+
+        # initialize predictions dict
+        predictions = {}
+        for name in self._models.keys():
+            predictions[name] = []
+
+        # initialize labels list to store all labels
+        labels = []
+        for batch, params, label in validate_loader:
+            labels.append(label)
+            for name in self._models.keys():
+                model = self._models[name]
+                metadata = {}
+                for idx, k in enumerate(self._param_keys):
+                    metadata[k] = params[:, idx]
+
+                prediction = model.validate(batch, label, metadata)
+
+                predictions[name].append(prediction)
+
+        # update performance dict and labels
+        y_truth = np.hstack(labels)
+        for name in self._models.keys():
+            y_pred = np.hstack(predictions[name])
+            self._report.add_record(name, self._epoch, self._batch, y_pred, y_truth)
+
+        # print a intermediate result
+        self._report.print_batch_report(self._epoch, self._batch)
+
+    def test(self):
         # test all models
-        for i, (batch, params, labels) in enumerate(test_loader):
+        loader_params = {
+            'batch_size': 128,
+            'shuffle': False,
+            'num_workers': 0,
+            'collate_fn': self.collate_fn
+        }
+        test_loader = DataLoader(self._test_set, **loader_params)
+
+        for batch, params, label in enumerate(test_loader):
             for name in self._models.keys():
                 model = self._models[name]
                 metadata = {
@@ -89,14 +142,9 @@ class MLPipe(object):
                 for idx, k in enumerate(self._param_keys):
                     metadata[k] = params[:, idx]
 
-                predictions = model.test(batch, labels, metadata)
+                prediction = model.validate(batch, label, metadata)
 
-        # clean up the memory
-        for name in self._models.keys():
-            model = self._models[name]
-            model.cleanup()
-        
-        
+
 class Model(object):
 
     name = ""
