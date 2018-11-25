@@ -49,7 +49,7 @@ class Dataset(data.Dataset):
         w_good = n_bad * 1.0 / n_keys
         w_bad = n_good * 1.0 / n_keys
 
-        weights = map(lambda l: w_good if l == 0 else w_bad, labels)
+        weights = map(lambda l: w_good if l == 1 else w_bad, labels)
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
         

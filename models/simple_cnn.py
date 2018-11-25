@@ -50,7 +50,7 @@ class CNNModel(Model):
         self.model = NeuralNet().to(device)        
 
         # Loss and optimizer
-        learning_rate = 0.02
+        learning_rate = 0.001
         self.criterion = nn.CrossEntropyLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
