@@ -14,8 +14,10 @@ from report import Report
 class MLPipe(object):
     def __init__(self):
         self._epochs = 1
-        self._batch_size = 128
+        self._train_batch_size = 128
+        self._validate_batch_size = 128
         self._validate_interval = 100
+        self._load_data = True
         self._models = dict()
         self.collate_fn = truncate_collate
         self._param_keys = None
@@ -33,17 +35,26 @@ class MLPipe(object):
     def set_epochs(self, epochs):
         self._epochs = epochs
 
-    def set_batch_size(self, batch_size):
-        self._batch_size = batch_size
-        
+    def set_load_data(self, load_data):
+        self._load_data = load_data
+
+    def set_train_batch_size(self, batch_size):
+        self._train_batch_size = int(batch_size)
+
+    def set_validate_batch_size(self, batch_size)
+        self._validate_batch_size = int(batch_size)
+
     def set_validate_interval(self, interval):
         self._validate_interval = int(interval)
 
     def set_dataset(self, src):
         if os.path.isfile(src):
-            self._train_set = Dataset(src=src, label='train')
-            self._validate_set = Dataset(src=src, label='validate')
-            self._test_set = Dataset(src=src, label='test')
+            self._train_set = Dataset(src=src, label='train', 
+                                      load_data=self._load_data)
+            self._validate_set = Dataset(src=src, label='validate',
+                                         load_data=self._load_data)
+            self._test_set = Dataset(src=src, label='test',
+                                     load_data=self._load_data)
 
             # retrieve parameter keys
             self._param_keys = self._train_set.param_keys
@@ -55,9 +66,16 @@ class MLPipe(object):
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
 
+        # check the batch size specified, 0 means do not use
+        # batch training
+        if self._train_batch_size == 0:
+            batch_size = len(self._train_set)
+        else:
+            batch_size = self._train_batch_size
+            
         # specify parameters used for train loader
         loader_params = {
-            'batch_size': self._batch_size,
+            'batch_size': batch_size,
             'sampler': self._train_set.get_sampler(),
             'collate_fn': self.collate_fn
         }
@@ -86,7 +104,7 @@ class MLPipe(object):
 
     def validate(self):
         loader_params = {
-            'batch_size': self._batch_size,
+            'batch_size': self._validate_batch_size,
             'shuffle': False,
             'collate_fn': self.collate_fn
         }
@@ -122,7 +140,7 @@ class MLPipe(object):
 
     def test(self):
         loader_params = {
-            'batch_size': self._batch_size,
+            'batch_size': self._validate_batch_size,
             'shuffle': False,
             'collate_fn': self.collate_fn
         }
