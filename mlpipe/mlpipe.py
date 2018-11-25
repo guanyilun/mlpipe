@@ -5,10 +5,10 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from sklearn import metrics
-from data import Dataset, truncate_collate
-
-from report import Report
 import numpy as np
+
+from data import Dataset, truncate_collate
+from report import Report
 
 
 class MLPipe(object):
@@ -84,7 +84,8 @@ class MLPipe(object):
             model = self._models[name]
             model.cleanup()
 
-    def validate(self):        
+    def validate(self):
+        sampler = self._validate_set.get_sampler()
         loader_params = {
             'batch_size': 128,
             'shuffle': False,
@@ -121,7 +122,6 @@ class MLPipe(object):
         self._report.print_batch_report(self._epoch, self._batch)
 
     def test(self):
-        # test all models
         loader_params = {
             'batch_size': 128,
             'shuffle': False,
@@ -129,18 +129,34 @@ class MLPipe(object):
         }
         test_loader = DataLoader(self._test_set, **loader_params)
 
-        for batch, params, label in enumerate(test_loader):
+        # initialize predictions dict
+        predictions = {}
+        for name in self._models.keys():
+            predictions[name] = []
+
+        # initialize labels list to store all labels
+        labels = []
+        for batch, params, label in test_loader:
+            labels.append(label)
             for name in self._models.keys():
                 model = self._models[name]
-                metadata = {
-                    'batch_id': i,
-                    'device': device
-                }
+                metadata = {}
                 for idx, k in enumerate(self._param_keys):
                     metadata[k] = params[:, idx]
 
                 prediction = model.validate(batch, label, metadata)
 
+                predictions[name].append(prediction)
+
+        # update performance dict and labels
+        y_truth = np.hstack(labels)
+        for name in self._models.keys():
+            y_pred = np.hstack(predictions[name])
+            self._report.add_record(name, -1, 0, y_pred, y_truth)
+
+        # print a intermediate result
+        print('== TEST RESULTS: ==')
+        self._report.print_batch_report(-1, 0)
 
 class Model(object):
 

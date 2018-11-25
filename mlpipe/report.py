@@ -7,8 +7,9 @@ from tabulate import tabulate
 class Report(object):
     def __init__(self):
         
-        columns = ['epoch', 'batch', 'model', 'loss', 'accuracy', 'precision',
-                   'recall', 'f1']
+        columns = ['epoch', 'batch', 'model', 'loss', 'base', 'accuracy',
+                   'tp', 'tn', 'fp', 'fn', 'precision', 'recall', 'f1']
+            
         self.report = pd.DataFrame(columns=columns)
 
     def add_record(self, model_name, epoch, batch, predict, truth):
@@ -16,12 +17,13 @@ class Report(object):
         accuracy = metrics.accuracy_score(truth, predict)
         precision = metrics.precision_score(truth, predict)
         recall = metrics.recall_score(truth, predict)
-        f1 = metrics.f1_score(truth, predict, average='binary')
-
+        f1 = metrics.f1_score(truth, predict)
+        tn, fp, fn, tp = metrics.confusion_matrix(truth, predict).ravel()
+        base = sum(truth) * 1.0 / len(truth)
         next_index = len(self.report.index)
         
-        self.report.loc[next_index] = [epoch, batch, model_name, loss, accuracy,
-                                       precision, recall, f1]
+        self.report.loc[next_index] = [epoch, batch, model_name, loss, base, accuracy,
+                                       tp, tn, fp, fn, precision, recall, f1]
                                    
     def print_batch_report(self, epoch, batch):
         report = self.report
