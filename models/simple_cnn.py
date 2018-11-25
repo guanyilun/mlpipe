@@ -72,7 +72,7 @@ class CNNModel(Model):
         loss.backward()
         self.optimizer.step()
         
-    def validate(data, labels, metedata):
+    def validate(self, data, labels, metedata):
         gpu = self.device
         data = torch.from_numpy(data[:,None,:]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)

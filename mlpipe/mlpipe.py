@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Main module."""
 from __future__ import print_function
 import os
@@ -9,6 +8,7 @@ from sklearn import metrics
 from data import Dataset, truncate_collate
 
 from report import Report
+import numpy as np
 
 
 class MLPipe(object):
@@ -49,9 +49,9 @@ class MLPipe(object):
 
         # specify parameters used for train loader
         loader_params = {
-            'batch_size': 128,
+            'batch_size': 1024,
             'shuffle': True,
-            'num_workers': 1,
+            'num_workers': 0,
             'collate_fn': self.collate_fn
         }
         train_loader = DataLoader(self._train_set, **loader_params)
@@ -87,9 +87,9 @@ class MLPipe(object):
 
     def validate(self):        
         loader_params = {
-            'batch_size': 128,
+            'batch_size': 1024,
             'shuffle': False,
-            'num_workers': 1,
+            'num_workers': 0,
             'collate_fn': self.collate_fn
         }
         validate_loader = DataLoader(self._validate_set, **loader_params)
@@ -101,14 +101,11 @@ class MLPipe(object):
 
         # initialize labels list to store all labels
         labels = []
-        for batch, params, label in self._validate_loader:
+        for batch, params, label in validate_loader:
             labels.append(label)
             for name in self._models.keys():
                 model = self._models[name]
-                metadata = {
-                    'batch_id': i,
-                    'device': device
-                }
+                metadata = {}
                 for idx, k in enumerate(self._param_keys):
                     metadata[k] = params[:, idx]
 
@@ -117,9 +114,9 @@ class MLPipe(object):
                 predictions[name].append(prediction)
 
         # update performance dict and labels
-        y_truth = np.vstack(labels)
+        y_truth = np.hstack(labels)
         for name in self._models.keys():
-            y_pred = np.vstack(predictions[name])
+            y_pred = np.hstack(predictions[name])
             self._report.add_record(name, self._epoch, self._batch, y_pred, y_truth)
 
         # print a intermediate result
@@ -130,7 +127,7 @@ class MLPipe(object):
         loader_params = {
             'batch_size': 128,
             'shuffle': False,
-            'num_workers': 1,
+            'num_workers': 0,
             'collate_fn': self.collate_fn
         }
         test_loader = DataLoader(self._test_set, **loader_params)
