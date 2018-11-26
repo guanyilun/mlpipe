@@ -3,3 +3,4 @@ pandas
 numpy
 sklearn
 h5py
+xgboost

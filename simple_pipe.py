@@ -15,6 +15,7 @@ from models.knn import KNNModel
 from models.svc import SVCModel
 from models.randfor import RFModel
 from models.tree import DecisionTreeModel
+from models.xgb import XGBModel
 
 pipe = MLPipe()
 
@@ -29,6 +30,7 @@ pipe.set_train_batch_size(0)
 pipe.load_dataset('data/dataset.h5', load_data=False)
 
 # add models to train and test together
+pipe.add_model(XGBModel())
 pipe.add_model(KNNModel(7))
 pipe.add_model(KNNModel(5))
 pipe.add_model(KNNModel(3))
