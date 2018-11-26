@@ -45,15 +45,17 @@ class Dataset(data.Dataset):
         
         return X, params, y
 
-    def get_sampler(self):
+    def get_sampler(self, good=1, bad=1):
         n_keys = len(self._keys)
-        
+
+        good_bias = good*2.0/(good+bad) 
+        bad_bias = bad*2.0/(good+bad)
         labels = [self._group[self._keys[i]].attrs['label'] for i in range(n_keys)]
-        n_good = np.sum(labels)
+        n_good = np.sum(labels) 
         n_bad = n_keys - n_good
 
-        w_good = n_bad * 1.0 / n_keys
-        w_bad = n_good * 1.0 / n_keys
+        w_good = n_bad * 1.0 / n_keys * good_bias
+        w_bad = n_good * 1.0 / n_keys * bad_bias
 
         weights = map(lambda l: w_good if l == 1 else w_bad, labels)
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
