@@ -17,7 +17,6 @@ class MLPipe(object):
         self._train_batch_size = 128
         self._validate_batch_size = 128
         self._validate_interval = 100
-        self._load_data = True
         self._models = dict()
         self.collate_fn = truncate_collate
         self._param_keys = None
@@ -35,9 +34,6 @@ class MLPipe(object):
     def set_epochs(self, epochs):
         self._epochs = epochs
 
-    def set_load_data(self, load_data):
-        self._load_data = load_data
-
     def set_train_batch_size(self, batch_size):
         self._train_batch_size = int(batch_size)
 
@@ -47,14 +43,14 @@ class MLPipe(object):
     def set_validate_interval(self, interval):
         self._validate_interval = int(interval)
 
-    def set_dataset(self, src):
+    def load_dataset(self, src, load_data=True):
         if os.path.isfile(src):
             self._train_set = Dataset(src=src, label='train', 
-                                      load_data=self._load_data)
+                                      load_data=load_data)
             self._validate_set = Dataset(src=src, label='validate',
-                                         load_data=self._load_data)
+                                         load_data=load_data)
             self._test_set = Dataset(src=src, label='test',
-                                     load_data=self._load_data)
+                                     load_data=load_data)
 
             # retrieve parameter keys
             self._param_keys = self._train_set.param_keys
