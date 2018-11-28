@@ -21,7 +21,7 @@ Machine Learning Pipeline for ACT
 
 Dependencies
 --------
-
+* python2.7 (I am still working on python 3 compatiblity)
 * pytorch
 * h5py
 * pandas
