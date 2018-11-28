@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Main module."""
 from __future__ import print_function
+import time
 import os
 import torch
 from torch.utils.data import DataLoader
@@ -92,7 +93,7 @@ class MLPipe(object):
                     metadata = {}
                     for idx, k in enumerate(self._param_keys):
                         metadata[k] = params[:, idx][:, None]
-
+                    # time the training process
                     model.train(batch, label, metadata)
 
                 if i % self._validate_interval == 0:
@@ -106,10 +107,15 @@ class MLPipe(object):
         }
         validate_loader = DataLoader(self._validate_set, **loader_params)
 
-        # initialize predictions dict
+        # initialize predictions to store the batch-wise predictions.
+        # They will be merged together at the end. We also generate
+        # a time_spent dictionary to store the time spend on each model
+        # batch-wise. These will also be merged together at the end. 
         predictions = {}
+        time_dict = {}
         for name in self._models.keys():
             predictions[name] = []
+            time_dict[name] = []
 
         # initialize labels list to store all labels
         labels = []
@@ -121,15 +127,21 @@ class MLPipe(object):
                 for idx, k in enumerate(self._param_keys):
                     metadata[k] = params[:, idx][:, None]
 
+                t_start = time.time()
                 prediction = model.validate(batch, label, metadata)
+                time_spent = time.time() - t_start
 
+                # save the prediction and time spent in this batch
                 predictions[name].append(prediction)
+                time_dict[name].append(time_spent)
+
 
         # update performance dict and labels
         y_truth = np.hstack(labels)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
-            self._report.add_record(name, self._epoch, self._batch, y_pred, y_truth)
+            time_spent = sum(time_dict[name])
+            self._report.add_record(name, self._epoch, self._batch, y_pred, y_truth, time_spent)
 
         # print a intermediate result
         print('== VALIDATION RESULTS: ==')        
@@ -143,10 +155,13 @@ class MLPipe(object):
         }
         test_loader = DataLoader(self._test_set, **loader_params)
 
-        # initialize predictions dict
+        # initialize predictions and time dict. similar to validation,
+        # we will save the result batch-wise
         predictions = {}
+        time_dict = {}
         for name in self._models.keys():
             predictions[name] = []
+            time_dict[name] = []
 
         # initialize labels list to store all labels
         labels = []
@@ -158,15 +173,19 @@ class MLPipe(object):
                 for idx, k in enumerate(self._param_keys):
                     metadata[k] = params[:, idx][:, None]
 
+                t_start = time.time()
                 prediction = model.validate(batch, label, metadata)
+                time_spent = time.time() - t_start
 
                 predictions[name].append(prediction)
+                time_dict[name].append(time_spent)
 
         # update performance dict and labels
         y_truth = np.hstack(labels)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
-            self._report.add_record(name, -1, 0, y_pred, y_truth)
+            time_spent = sum(time_dict[name])
+            self._report.add_record(name, -1, 0, y_pred, y_truth, time_spent)
 
         # print a intermediate result
         print('== TEST RESULTS: ==')

@@ -1,6 +1,6 @@
 tabulate
 pandas
 numpy
-sklearn
 h5py
 xgboost
+scikit-learn==0.20

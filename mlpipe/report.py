@@ -8,11 +8,11 @@ class Report(object):
     def __init__(self):
         
         columns = ['epoch', 'batch', 'model', 'loss', 'base', 'accuracy',
-                   'tp', 'tn', 'fp', 'fn', 'precision', 'recall', 'f1']
+                   'tp', 'tn', 'fp', 'fn', 'precision', 'recall', 'f1', 'time/s']
             
         self.report = pd.DataFrame(columns=columns)
 
-    def add_record(self, model_name, epoch, batch, predict, truth):
+    def add_record(self, model_name, epoch, batch, predict, truth, time_spent):
         loss = metrics.log_loss(truth, predict)
         accuracy = metrics.accuracy_score(truth, predict)
         precision = metrics.precision_score(truth, predict)
@@ -23,7 +23,7 @@ class Report(object):
         next_index = len(self.report.index)
         
         self.report.loc[next_index] = [epoch, batch, model_name, loss, base, accuracy,
-                                       tp, tn, fp, fn, precision, recall, f1]
+                                       tp, tn, fp, fn, precision, recall, f1, time_spent]
                                    
     def print_batch_report(self, epoch, batch):
         report = self.report
