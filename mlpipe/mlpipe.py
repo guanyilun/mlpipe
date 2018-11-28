@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader
 from sklearn import metrics
 import numpy as np
 
-from data import Dataset, truncate_collate
-from report import Report
+from .data import Dataset, truncate_collate
+from .report import Report
 
 
 class MLPipe(object):
