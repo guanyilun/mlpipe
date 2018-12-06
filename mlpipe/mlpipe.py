@@ -48,7 +48,7 @@ class MLPipe(object):
     def set_validate_interval(self, interval):
         self._validate_interval = int(interval)
 
-    def set_train_bias(good, bad):
+    def set_train_bias(self, good, bad):
         """Set a bias between good and bad samples used in the training. 
         
         Examples:
