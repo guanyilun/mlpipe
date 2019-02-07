@@ -11,29 +11,43 @@ class KNNModel(Model):
 
     def __init__(self, n_neighbors=7):
         Model.__init__(self)
-        self.knn = KNeighborsClassifier(n_neighbors=n_neighbors)
+        self.model = KNeighborsClassifier(n_neighbors=n_neighbors)
         self.name = '{}-{}'.format(self.name, n_neighbors)
 
     def train(self, data, labels, metadata):
         corrLive = metadata['corrLive']
         rmsLive = metadata['rmsLive']
         kurtLive = metadata['kurtLive']
+        DELive = metadata['DELive']
+        MFELive = metadata['MFELive']
         skewLive = metadata['skewLive']
         normLive = metadata['normLive']
-        features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
-        self.knn.fit(features, labels)
+        darkRatioLive = metadata['darkRatioLive']
+        jumpLive = metadata['jumpLive']
+        gainLive = metadata['gainLive']
+        features = np.hstack([corrLive, rmsLive, kurtLive, DELive,
+                              MFELive, skewLive, normLive, darkRatioLive, jumpLive,
+                              gainLive])
+        self.model.fit(features, labels)
     
     def validate(self, data, labels, metadata):
         corrLive = metadata['corrLive']
         rmsLive = metadata['rmsLive']
         kurtLive = metadata['kurtLive']
+        DELive = metadata['DELive']
+        MFELive = metadata['MFELive']
         skewLive = metadata['skewLive']
         normLive = metadata['normLive']
-        features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
-        prediction = self.knn.predict(features)
+        darkRatioLive = metadata['darkRatioLive']
+        jumpLive = metadata['jumpLive']
+        gainLive = metadata['gainLive']
+        features = np.hstack([corrLive, rmsLive, kurtLive, DELive,
+                              MFELive, skewLive, normLive, darkRatioLive, jumpLive,
+                              gainLive])
+        prediction = self.model.predict(features)
         return prediction
 
     def save(self, filename):
         with open(filename, 'wb') as f:
-            pickle.dump(self.knn, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)
 

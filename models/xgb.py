@@ -17,18 +17,32 @@ class XGBModel(Model):
         corrLive = metadata['corrLive']
         rmsLive = metadata['rmsLive']
         kurtLive = metadata['kurtLive']
+        DELive = metadata['DELive']
+        MFELive = metadata['MFELive']
         skewLive = metadata['skewLive']
         normLive = metadata['normLive']
-        features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
+        darkRatioLive = metadata['darkRatioLive']
+        jumpLive = metadata['jumpLive']
+        gainLive = metadata['gainLive']
+        features = np.hstack([corrLive, rmsLive, kurtLive, DELive,
+                              MFELive, skewLive, normLive, darkRatioLive, jumpLive,
+                              gainLive])
         self.model.fit(features, labels)
     
     def validate(self, data, labels, metadata):
         corrLive = metadata['corrLive']
         rmsLive = metadata['rmsLive']
         kurtLive = metadata['kurtLive']
+        DELive = metadata['DELive']
+        MFELive = metadata['MFELive']
         skewLive = metadata['skewLive']
         normLive = metadata['normLive']
-        features = np.hstack([corrLive, rmsLive, kurtLive, skewLive, normLive])
+        darkRatioLive = metadata['darkRatioLive']
+        jumpLive = metadata['jumpLive']
+        gainLive = metadata['gainLive']
+        features = np.hstack([corrLive, rmsLive, kurtLive, DELive,
+                              MFELive, skewLive, normLive, darkRatioLive, jumpLive,
+                              gainLive])
         prediction = self.model.predict(features)
         return prediction
 

@@ -29,6 +29,10 @@ class MLPipe(object):
         self._epoch = 0  
         self._batch = 0
 
+        # sampling weight
+        self._good_weight = 1
+        self._bad_weight = 1
+
     def add_model(self, model):
         self._models[model.name] = model
 
@@ -43,6 +47,19 @@ class MLPipe(object):
 
     def set_validate_interval(self, interval):
         self._validate_interval = int(interval)
+
+    def set_train_bias(self, good, bad):
+        """Set a bias between good and bad samples used in the training. 
+        
+        Examples:
+            set_train_bias(good=1, bad=3) means that bad detectors are sampled
+            three times good detectors. (good 25%; bad 75%)
+        Params:
+            good: weight for the good label
+            bad: weight for the bad label
+        """
+        self._good_weight = good
+        self._bad_weight = bad
 
     def load_dataset(self, src, load_data=True):
         if os.path.isfile(src):
@@ -73,7 +90,8 @@ class MLPipe(object):
         # specify parameters used for train loader
         loader_params = {
             'batch_size': batch_size,
-            'sampler': self._train_set.get_sampler(),
+            'sampler': self._train_set.get_sampler(good=self._good_weight, 
+                                                   bad=self._bad_weight),
             'collate_fn': self.collate_fn
         }
         train_loader = DataLoader(self._train_set, **loader_params)
