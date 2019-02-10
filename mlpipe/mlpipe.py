@@ -37,6 +37,14 @@ class MLPipe(object):
         self._models[model.name] = model
 
     def set_epochs(self, epochs):
+        """Set the total number of epoches to run, and each epoch means running
+        the entire training set once. For example, set_epochs(10) means all
+        training data should run 10 times. This is only useful for models
+        that support batch learning
+
+        Params:
+            epochs: integer, number of epochs to run
+        """
         self._epochs = epochs
 
     def set_train_batch_size(self, batch_size):
@@ -46,6 +54,15 @@ class MLPipe(object):
         self._validate_batch_size = int(batch_size)
 
     def set_validate_interval(self, interval):
+        """Set how often do we run validation during training. For example,
+        a value of 100 (default value) means that after every 100 batches 
+        we should run validation once. The result from the validation will
+        be automatically saved in the report for future analysis. 
+
+        Params:
+            interval: integer, number of batches
+        """
+
         self._validate_interval = int(interval)
 
     def set_train_bias(self, good, bad):
