@@ -12,37 +12,18 @@ class XGBModel(Model):
     def __init__(self):
         Model.__init__(self)
         self.model = XGBClassifier()
+        self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
+                         'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
+                         'jumpLive', 'gainLive']
 
     def train(self, data, labels, metadata):
-        corrLive = metadata['corrLive']
-        rmsLive = metadata['rmsLive']
-        kurtLive = metadata['kurtLive']
-        DELive = metadata['DELive']
-        MFELive = metadata['MFELive']
-        skewLive = metadata['skewLive']
-        normLive = metadata['normLive']
-        darkRatioLive = metadata['darkRatioLive']
-        jumpLive = metadata['jumpLive']
-        gainLive = metadata['gainLive']
-        features = np.hstack([corrLive, rmsLive, kurtLive, DELive,
-                              MFELive, skewLive, normLive, darkRatioLive, jumpLive,
-                              gainLive])
+        # gather all metadata to form the features
+        features = np.hstack([metadata[key] for key in self.features])
         self.model.fit(features, labels)
     
     def validate(self, data, labels, metadata):
-        corrLive = metadata['corrLive']
-        rmsLive = metadata['rmsLive']
-        kurtLive = metadata['kurtLive']
-        DELive = metadata['DELive']
-        MFELive = metadata['MFELive']
-        skewLive = metadata['skewLive']
-        normLive = metadata['normLive']
-        darkRatioLive = metadata['darkRatioLive']
-        jumpLive = metadata['jumpLive']
-        gainLive = metadata['gainLive']
-        features = np.hstack([corrLive, rmsLive, kurtLive, DELive,
-                              MFELive, skewLive, normLive, darkRatioLive, jumpLive,
-                              gainLive])
+        # gather all metadata to form the features
+        features = np.hstack([metadata[key] for key in self.features])
         prediction = self.model.predict(features)
         return prediction
 
