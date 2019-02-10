@@ -28,6 +28,8 @@ class MLPipe(object):
         # internal counter for epoch and batch id
         self._epoch = 0  
         self._batch = 0
+
+        # sampling weight
         self._good_weight = 1
         self._bad_weight = 1
 
@@ -63,7 +65,7 @@ class MLPipe(object):
 
         self._validate_interval = int(interval)
 
-    def set_train_bias(good, bad):
+    def set_train_bias(self, good, bad):
         """Set a bias between good and bad samples used in the training. 
         
         Examples:

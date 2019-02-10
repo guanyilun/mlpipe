@@ -24,10 +24,12 @@ pipe = MLPipe()
 # important
 pipe.set_epochs(1)
 pipe.set_train_batch_size(0)
+pipe.set_train_bias(good=1, bad=1)
 
 # in this pipeline I will not need
 # the tod data
-pipe.load_dataset('data/dataset.h5', load_data=False)
+# pipe.load_dataset('data/dataset.h5', load_data=False)
+pipe.load_dataset('/mnt/act3/users/yilun/share/dataset.h5', load_data=False)
 
 # add models to train and test together
 pipe.add_model(XGBModel())
@@ -42,6 +44,6 @@ pipe.add_model(DecisionTreeModel())
 
 # excute the pipeline
 pipe.train()
-pipe.test()
+# pipe.test()
 pipe.save('saved_runs/test/')
 pipe.clean()
