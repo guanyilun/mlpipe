@@ -11,8 +11,6 @@ If you are working on more advanced models that support batch processing,
 please refer to the batch_pipe.py.  """
 
 from mlpipe import MLPipe
-from models.knn import KNNModel
-from models.svc import SVCModel
 from models.randfor import RFModel
 from models.tree import DecisionTreeModel
 from models.xgb import XGBModel
@@ -33,17 +31,12 @@ pipe.load_dataset('/mnt/act3/users/yilun/share/dataset.h5', load_data=False)
 
 # add models to train and test together
 pipe.add_model(XGBModel())
-pipe.add_model(KNNModel(7))
-pipe.add_model(KNNModel(5))
-pipe.add_model(KNNModel(3))
-pipe.add_model(SVCModel())
-pipe.add_model(RFModel(n_estimators=20))
-pipe.add_model(RFModel(n_estimators=10))
 pipe.add_model(RFModel(n_estimators=5))
 pipe.add_model(DecisionTreeModel())
 
 # excute the pipeline
 pipe.train()
+
 # pipe.test()
-pipe.save('saved_runs/test/')
+# pipe.save('saved_runs/test/')
 pipe.clean()
