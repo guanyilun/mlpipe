@@ -84,9 +84,14 @@ class MLPipe(object):
                                       load_data=load_data)
             self._validate_set = Dataset(src=src, label='validate',
                                          load_data=load_data)
-            self._test_set = Dataset(src=src, label='test',
-                                     load_data=load_data)
-
+            # In case that the test data is not available
+            # do not stop but give a warining
+            try:
+                self._test_set = Dataset(src=src, label='test',
+                                         load_data=load_data)
+            except IOError:
+                print("WARNING: test data is not available!")
+                
             # retrieve parameter keys
             self._param_keys = self._train_set.param_keys
 
