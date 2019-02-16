@@ -21,9 +21,10 @@ class MLPipe(object):
         self._models = dict()
         self.collate_fn = truncate_collate
         self._param_keys = None
+        self._output_dir = "outputs"
 
         # performance reporting
-        self._report = Report()
+        self._report = Report(output_dir=self._output_dir)
 
         # internal counter for epoch and batch id
         self._epoch = 0  
@@ -77,6 +78,11 @@ class MLPipe(object):
         """
         self._good_weight = good
         self._bad_weight = bad
+
+    def set_output_dir(self, output_dir):
+        """Set output directory to store pipeline results"""
+        self._output_dir = output_dir
+        self._report.set_output_dir(output_dir)
 
     def load_dataset(self, src, load_data=True):
         if os.path.isfile(src):
@@ -157,9 +163,11 @@ class MLPipe(object):
         # a time_spent dictionary to store the time spend on each model
         # batch-wise. These will also be merged together at the end. 
         predictions = {}
+        probas = {}
         time_dict = {}
         for name in self._models.keys():
             predictions[name] = []
+            probas[name] = []
             time_dict[name] = []
 
         # initialize labels list to store all labels
@@ -173,23 +181,27 @@ class MLPipe(object):
                     metadata[k] = params[:, idx][:, None]
 
                 t_start = time.time()
-                prediction = model.validate(batch, label, metadata)
+                prediction, proba = model.validate(batch, label,
+                                                   metadata)
                 time_spent = time.time() - t_start
 
                 # save the prediction and time spent in this batch
                 predictions[name].append(prediction)
+                probas[name].append(proba)
                 time_dict[name].append(time_spent)
-
 
         # update performance dict and labels
         y_truth = np.hstack(labels)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
+            y_pred_proba = np.vstack(probas[name])
             time_spent = sum(time_dict[name])
-            self._report.add_record(name, self._epoch, self._batch, y_pred, y_truth, time_spent)
+            self._report.add_record(name, self._epoch, self._batch,
+                                    y_pred, y_pred_proba, y_truth,
+                                    time_spent)
 
         # print a intermediate result
-        print('== VALIDATION RESULTS: ==')        
+        print('== VALIDATION RESULTS: ==')
         self._report.print_batch_report(self._epoch, self._batch)
 
     def test(self):
@@ -203,11 +215,13 @@ class MLPipe(object):
         # initialize predictions and time dict. similar to validation,
         # we will save the result batch-wise
         predictions = {}
+        probas = {}
         time_dict = {}
         for name in self._models.keys():
             predictions[name] = []
             time_dict[name] = []
-
+            probas[name] = []
+            
         # initialize labels list to store all labels
         labels = []
         for batch, params, label in test_loader:
@@ -219,38 +233,40 @@ class MLPipe(object):
                     metadata[k] = params[:, idx][:, None]
 
                 t_start = time.time()
-                prediction = model.validate(batch, label, metadata)
+                prediction, proba = model.validate(batch, label, metadata)
                 time_spent = time.time() - t_start
 
                 predictions[name].append(prediction)
+                probas[name].append(proba)
                 time_dict[name].append(time_spent)
 
         # update performance dict and labels
         y_truth = np.hstack(labels)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
+            y_pred_proba = np.hstack(probas[name])
             time_spent = sum(time_dict[name])
-            self._report.add_record(name, -1, 0, y_pred, y_truth, time_spent)
+            self._report.add_record(name, -1, 0, y_pred, y_pred_proba, y_truth, time_spent)
 
         # print a intermediate result
         print('== TEST RESULTS: ==')
         self._report.print_batch_report(-1, 0)
 
-    def save(self, path):
+    def save(self):
         # create folder if not existing
-        if not os.path.exists(path):
-            print('Path: {} does not exist, creating now ...'.format(path))
-            os.makedirs(path)
+        if not os.path.exists(self._output_dir):
+            print('Path: {} does not exist, creating now ...'.format(self._output_dir))
+            os.makedirs(self._output_dir)
 
         # save each model
         for name in self._models.keys():
             model = self._models[name]
-            filename = os.path.join(path, name+'.pickle')
+            filename = os.path.join(self._output_dir, name+'.pickle')
             model.save(filename)
 
         # save report
-        report_filename = os.path.join(path, 'report.pickle')
-        self._report.save(report_filename)
+        report_filename = os.path.join(self._output_dir, 'report.pickle')
+        self._report.save()
 
     def clean(self):
         for name in self._models.keys():

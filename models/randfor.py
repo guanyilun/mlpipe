@@ -35,7 +35,8 @@ class RFModel(Model):
     def validate(self, data, labels, metadata):
         features = np.hstack([metadata[key] for key in self.features])
         prediction = self.model.predict(features)
-        return prediction
+        prediction_prob = self.model.predict_proba(features)
+        return prediction, prediction_prob
     
     def save(self, filename):
         with open(filename, 'wb') as f:
