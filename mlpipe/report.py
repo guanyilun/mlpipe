@@ -12,7 +12,7 @@ class Report(object):
             
         self.report = pd.DataFrame(columns=columns)
 
-    def add_record(self, model_name, epoch, batch, predict, truth, time_spent):
+    def add_record(self, model_name, epoch, batch, predict, proba, truth, time_spent):
         loss = metrics.log_loss(truth, predict)
         accuracy = metrics.accuracy_score(truth, predict)
         precision = metrics.precision_score(truth, predict)
