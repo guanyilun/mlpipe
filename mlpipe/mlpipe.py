@@ -132,9 +132,11 @@ class MLPipe(object):
         # setup all models
         for name in self._models.keys():
             model = self._models[name]
+            print("Setting up model: %s" % name)
             model.setup(device)
 
         # train all models
+        print("Training models...")
         for epoch in range(self._epochs):
             self._epoch = epoch
             for i, (batch, params, label) in enumerate(train_loader):
@@ -172,6 +174,7 @@ class MLPipe(object):
 
         # initialize labels list to store all labels
         labels = []
+        print("Validating models...")
         for batch, params, label in validate_loader:
             labels.append(label)
             for name in self._models.keys():
@@ -192,6 +195,8 @@ class MLPipe(object):
 
         # update performance dict and labels
         y_truth = np.hstack(labels)
+
+        print("Saving validation data...")
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
             y_pred_proba = np.vstack(probas[name])
@@ -201,6 +206,7 @@ class MLPipe(object):
                                     time_spent)
 
         # print a intermediate result
+        print('')
         print('== VALIDATION RESULTS: ==')
         self._report.print_batch_report(self._epoch, self._batch)
 
