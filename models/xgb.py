@@ -25,7 +25,8 @@ class XGBModel(Model):
         # gather all metadata to form the features
         features = np.hstack([metadata[key] for key in self.features])
         prediction = self.model.predict(features)
-        return prediction
+        prediction_proba = self.model.predict_proba(features)
+        return prediction, prediction_proba
 
     def save(self, filename):
         with open(filename, 'wb') as f:
