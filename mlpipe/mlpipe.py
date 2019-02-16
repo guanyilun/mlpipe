@@ -150,7 +150,6 @@ class MLPipe(object):
                     model.train(batch, label, metadata)
 
                 if i % self._validate_interval == 0:
-                    print("Validating models...")
                     self.validate()
 
     def validate(self):
@@ -175,6 +174,7 @@ class MLPipe(object):
 
         # initialize labels list to store all labels
         labels = []
+        print("Validating models...")
         for batch, params, label in validate_loader:
             labels.append(label)
             for name in self._models.keys():
@@ -195,8 +195,8 @@ class MLPipe(object):
 
         # update performance dict and labels
         y_truth = np.hstack(labels)
+
         print("Saving validation data...")
-        
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
             y_pred_proba = np.vstack(probas[name])
