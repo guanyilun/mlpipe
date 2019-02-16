@@ -27,7 +27,8 @@ Dependencies
 * pandas
 * tabulate
 * numpy
-* sklearn
+* scikit-learn
+* scikit-plot
 
 Installation
 --------
