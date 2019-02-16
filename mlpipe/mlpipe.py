@@ -100,7 +100,12 @@ class MLPipe(object):
 
     def train(self):
         use_cuda = torch.cuda.is_available()
-        device = torch.device("cuda:0" if use_cuda else "cpu")
+        if use_cuda:
+            print("GPU found, setting device to GPU...")
+            device = torch.device("cuda:0")
+        else:
+            print("GPU not found or supported, setting device to CPU...")
+            device = torch.device("cpu")
 
         # check the batch size specified, 0 means do not use
         # batch training
