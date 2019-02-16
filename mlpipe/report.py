@@ -2,15 +2,20 @@ from __future__ import print_function
 import pandas as pd
 from sklearn import metrics
 from tabulate import tabulate
+import os
+from matplotlib import pyplot as plt
+import scikitplot as skplt
 
 
 class Report(object):
-    def __init__(self):
-        
+    def __init__(self, output_dir="outputs", plot=True):
+            
         columns = ['epoch', 'batch', 'model', 'loss', 'base', 'accuracy',
                    'tp', 'tn', 'fp', 'fn', 'precision', 'recall', 'f1', 'time/s']
-            
+
+        self.plot = plot
         self.report = pd.DataFrame(columns=columns)
+            
 
     def add_record(self, model_name, epoch, batch, predict, proba, truth, time_spent):
         loss = metrics.log_loss(truth, predict)
@@ -24,6 +29,13 @@ class Report(object):
         
         self.report.loc[next_index] = [epoch, batch, model_name, loss, base, accuracy,
                                        tp, tn, fp, fn, precision, recall, f1, time_spent]
+
+        if self.plot:
+            # plot roc curve
+            plt.figure()
+            skplt.metrics.plot_roc(predict, proba)
+            plt.save_fig(os.path.join(self.output_dir, "%s_roc_curve.png" % model_name))
+
                                    
     def print_batch_report(self, epoch, batch):
         report = self.report
@@ -32,8 +44,8 @@ class Report(object):
         print(tabulate(mini_report, headers='keys', tablefmt='pqsl', showindex=False))
         print('')
     
-    def save(self, fname):
-        self.report.to_pickle(fname)
+    def save(self):
+        self.report.to_pickle(os.path.join(self.output_dir, "summary.pickle"))
                                    
-                                   
-                                   
+    def set_output_dir(self, output_dir):
+        self.output_dir = output_dir

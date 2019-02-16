@@ -38,5 +38,5 @@ pipe.add_model(DecisionTreeModel())
 pipe.train()
 
 # pipe.test()
-# pipe.save('saved_runs/test/')
+# pipe.save()
 pipe.clean()
