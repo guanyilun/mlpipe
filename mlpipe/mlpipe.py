@@ -194,7 +194,7 @@ class MLPipe(object):
         y_truth = np.hstack(labels)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
-            y_pred_proba = np.hstack(probas[name])
+            y_pred_proba = np.vstack(probas[name])
             time_spent = sum(time_dict[name])
             self._report.add_record(name, self._epoch, self._batch,
                                     y_pred, y_pred_proba, y_truth,
