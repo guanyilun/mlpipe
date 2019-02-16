@@ -32,13 +32,34 @@ class Report(object):
                                        tp, tn, fp, fn, precision, recall, f1, time_spent]
 
         if self.plot:
-            # plot roc curve
-            plt.figure()
-            skplt.metrics.plot_roc(predict, proba)
             if not os.path.exists(self.output_dir):
                 print("Folder %s doesn't exist, creating now..." % self.output_dir)
                 os.makedirs(self.output_dir)
+
+            # plot roc curve
+            plt.figure()
+            skplt.metrics.plot_roc(truth, proba)
             plt.savefig(os.path.join(self.output_dir, "%s_roc_curve.png" % model_name))
+            plt.close()
+
+            # plot precision-recall curve
+            plt.figure()
+            skplt.metrics.plot_precision_recall_curve(truth, proba)
+            plt.savefig(os.path.join(self.output_dir, "%s_pr_curve.png" % model_name))
+            plt.close()
+
+            # plot confusion matrix
+            plt.figure()
+            skplt.metrics.plot_confusion_matrix(y_true=truth, y_pred=predict)
+            plt.savefig(os.path.join(self.output_dir, "%s_confusion_matrix.png" % model_name))
+            plt.close()
+
+            # plot cumulative gain curve
+            plt.figure()
+            skplt.metrics.plot_cumulative_gain(truth, proba)
+            plt.savefig(os.path.join(self.output_dir, "%s_cumulative_gain.png" % model_name))
+            plt.close()
+
 
 
     def print_batch_report(self, epoch, batch):
