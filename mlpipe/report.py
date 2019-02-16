@@ -46,7 +46,7 @@ class Report(object):
 
             # plot precision-recall curve
             plt.figure()
-            skplt.metrics.plot_precision_recall_curve(truth, proba)
+            skplt.metrics.plot_precision_recall(truth, proba)
             filename = os.path.join(self.output_dir, "%s_pr_curve.png" % model_name)
             print("Saving plot: %s" % filename)
             plt.savefig(filename)
