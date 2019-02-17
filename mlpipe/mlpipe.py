@@ -95,7 +95,7 @@ class MLPipe(object):
             try:
                 self._test_set = Dataset(src=src, label='test',
                                          load_data=load_data)
-            except IOError:
+            except Exception:
                 print("WARNING: test data is not available!")
                 
             # retrieve parameter keys
