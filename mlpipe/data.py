@@ -34,7 +34,7 @@ class Dataset(data.Dataset):
         if self._load_data:
             X = dataset[:]
         else:  
-            X = [0]
+            X = np.array([0])
         # sort in specific order
         y = dataset.attrs['label']
 
@@ -61,7 +61,6 @@ class Dataset(data.Dataset):
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
         
-
 def truncate_collate(batch):
     """
     args:
@@ -73,11 +72,12 @@ def truncate_collate(batch):
         y - a vector of labels
     """
     # find shortest sequence
-    min_len = min([len(b[0]) for b in batch])
-
+    get_len = lambda b: len(b) if type(b) is list else b.shape[-1]
+    min_len = min([get_len(b[0]) for b in batch])
     # truncate according to min_len
     # stack all
-    X = np.vstack(map(lambda x: x[0][:min_len], batch))
+    X = np.stack(map(lambda x: x[0][..., :min_len], batch), axis=0)
     params = np.vstack(map(lambda x: x[1], batch))
     y = np.array(map(lambda x: x[2], batch))
+
     return X, params, y
