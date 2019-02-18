@@ -72,8 +72,7 @@ def truncate_collate(batch):
         y - a vector of labels
     """
     # find shortest sequence
-    get_len = lambda b: len(b) if type(b) is list else b.shape[-1]
-    min_len = min([get_len(b[0]) for b in batch])
+    min_len = min([b[0].shape[-1] for b in batch])
     # truncate according to min_len
     # stack all
     X = np.stack(map(lambda x: x[0][..., :min_len], batch), axis=0)
