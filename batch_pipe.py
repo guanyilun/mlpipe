@@ -15,16 +15,15 @@ from models.deep import CNNModel
 
 pipe = MLPipe()
 
-# since there is no batch training
-# epotches and batch size are not
-# important
-pipe.set_epochs(1)
-pipe.set_train_bias(good=1, bad=1)
+# setup some pipeline parameters
+pipe.set_epochs(30)
+pipe.set_train_bias(good=2, bad=3)
+pipe.set_train_batch_size(1024)
+pipe.set_validate_batch_size(1024)
+pipe.set_validate_interval(1)
 
-# in this pipeline I will not need
-# the tod data
-# pipe.load_dataset('data/dataset.h5', load_data=False)
-pipe.load_dataset('/mnt/act3/users/yilun/work/act-cutflow/outputs/dataset_2d.h5', load_data=True)
+# load dataset
+pipe.load_dataset('data/dataset_2d.h5', load_data=True)
 
 # add models to train and test together
 pipe.add_model(CNNModel())
@@ -33,5 +32,5 @@ pipe.add_model(CNNModel())
 pipe.train()
 
 # pipe.test()
-# pipe.save('saved_runs/test/')
+pipe.save()
 pipe.clean()
