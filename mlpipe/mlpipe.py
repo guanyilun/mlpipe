@@ -153,8 +153,15 @@ class MLPipe(object):
                     self.validate()
 
     def validate(self):
+        # check the batch size specified, 0 means do not use
+        # batch training
+        if self._validate_batch_size == 0:
+            batch_size = len(self._validate_set)
+        else:
+            batch_size = self._validate_batch_size
+
         loader_params = {
-            'batch_size': self._validate_batch_size,
+            'batch_size': batch_size,
             'shuffle': False,
             'collate_fn': self.collate_fn
         }
