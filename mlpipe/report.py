@@ -1,5 +1,6 @@
 from __future__ import print_function
 import pandas as pd
+import numpy as np
 from sklearn import metrics
 from tabulate import tabulate
 import os
@@ -29,8 +30,7 @@ class Report(object):
         
         self.report.loc[next_index] = [epoch, batch, model_name, loss, base, accuracy,
                                        tp, tn, fp, fn, precision, recall, f1, time_spent]
-
-        if plot:
+        if plot and np.any(proba):
             if not os.path.exists(self.output_dir):
                 print("Folder %s doesn't exist, creating now..." % self.output_dir)
                 os.makedirs(self.output_dir)
