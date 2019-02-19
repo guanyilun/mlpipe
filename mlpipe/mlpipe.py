@@ -33,6 +33,7 @@ class MLPipe(object):
         # sampling weight
         self._good_weight = 1
         self._bad_weight = 1
+        self._has_setup = False
 
     def add_model(self, model):
         self._models[model.name] = model
@@ -104,7 +105,7 @@ class MLPipe(object):
         else:
             raise IOError("Dataset provided is not found!")
 
-    def train(self):
+    def setup(self):
         use_cuda = torch.cuda.is_available()
         if use_cuda:
             print("GPU found, setting device to GPU...")
@@ -112,6 +113,18 @@ class MLPipe(object):
         else:
             print("GPU not found or supported, setting device to CPU...")
             device = torch.device("cpu")
+
+        # setup all models
+        for name in self._models.keys():
+            model = self._models[name]
+            print("Setting up model: %s" % name)
+            model.setup(device)
+
+    def train(self):
+        # automatically run setup if not ran already
+        if not self._has_setup:
+            self.setup()
+            self._has_setup = True
 
         # check the batch size specified, 0 means do not use
         # batch training
@@ -128,12 +141,6 @@ class MLPipe(object):
             'collate_fn': self.collate_fn
         }
         train_loader = DataLoader(self._train_set, **loader_params)
-
-        # setup all models
-        for name in self._models.keys():
-            model = self._models[name]
-            print("Setting up model: %s" % name)
-            model.setup(device)
 
         # train all models
         print("Training models...")
@@ -281,6 +288,20 @@ class MLPipe(object):
         report_filename = os.path.join(self._output_dir, 'report.pickle')
         self._report.save()
 
+    def load(self):
+        """Load saved models data to continue training"""
+        # setup the models if not already setup
+        if not self._has_setup:
+            self.setup()
+            self._has_setup = True
+
+        # try to load saved data
+        if os.path.exists(self._output_dir):
+            for name in self._models.keys():
+                model = self._models[name]
+                filename = os.path.join(self._output_dir, name+'.pickle')
+                model.load(filename)
+
     def clean(self):
         for name in self._models.keys():
             model = self._models[name]
@@ -304,6 +325,9 @@ class Model(object):
         raise RuntimeError("This method needs to be overridden!")
 
     def save(self, filename):
+        pass
+
+    def load(self, filename):
         pass
 
     def clean(self):
