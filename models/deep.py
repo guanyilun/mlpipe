@@ -76,13 +76,14 @@ class CNNModel(Model):
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
                          'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
                          'jumpLive', 'gainLive']
+        self.model = NeuralNet()
 
     def setup(self, device):
         self.device = device
-        self.model = NeuralNet().to(device)
+        self.model = self.model.to(device)
 
         # Loss and optimizer
-        learning_rate = 0.05
+        learning_rate = 0.01
         self.criterion = nn.CrossEntropyLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
@@ -96,6 +97,8 @@ class CNNModel(Model):
         fdata = torch.from_numpy(data[:, 1, None, ...]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
 
+        tdata -= torch.mean(tdata)
+        
         features = np.hstack([metadata[key] for key in self.features])
         features = torch.from_numpy(features).type(torch.FloatTensor)
 
@@ -121,7 +124,9 @@ class CNNModel(Model):
         tdata = torch.from_numpy(data[:, 0, None, ...]).type(torch.FloatTensor)
         fdata = torch.from_numpy(data[:, 1, None, ...]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
-
+        
+        tdata -= torch.mean(tdata)
+        
         features = np.hstack([metadata[key] for key in self.features])
         features = torch.from_numpy(features).type(torch.FloatTensor)
 

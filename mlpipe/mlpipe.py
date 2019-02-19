@@ -290,17 +290,17 @@ class MLPipe(object):
 
     def load(self):
         """Load saved models data to continue training"""
-        # setup the models if not already setup
-        if not self._has_setup:
-            self.setup()
-            self._has_setup = True
-
         # try to load saved data
         if os.path.exists(self._output_dir):
             for name in self._models.keys():
                 model = self._models[name]
                 filename = os.path.join(self._output_dir, name+'.pickle')
                 model.load(filename)
+
+        # setup the models if not already setup
+        if not self._has_setup:
+            self.setup()
+            self._has_setup = True
 
     def clean(self):
         for name in self._models.keys():
