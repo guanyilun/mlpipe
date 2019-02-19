@@ -32,7 +32,8 @@ pipe.add_model(CNNModel())
 try:
     pipe.train()
 except KeyboardInterrupt:
-    print("Keyboardinterrupt received, saving models")
+    print("")
+    print("Keyboard interrupt received, saving and exiting...")
 
 # pipe.test()
 pipe.save()

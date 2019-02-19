@@ -281,6 +281,14 @@ class MLPipe(object):
         report_filename = os.path.join(self._output_dir, 'report.pickle')
         self._report.save()
 
+    def load(self):
+        """Load saved models data to continue training"""
+        if os.path.exists(self._output_dir):
+            for name in self._models.keys():
+                model = self._models[name]
+                filename = os.path.join(self._output_dir, name+'.pickle')
+                model.load(filename)
+
     def clean(self):
         for name in self._models.keys():
             model = self._models[name]
@@ -304,6 +312,9 @@ class Model(object):
         raise RuntimeError("This method needs to be overridden!")
 
     def save(self, filename):
+        pass
+
+    def load(self, filename):
         pass
 
     def clean(self):
