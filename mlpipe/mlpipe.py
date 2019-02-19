@@ -122,7 +122,7 @@ class MLPipe(object):
 
     def train(self):
         # automatically run setup if not ran already
-        if self._has_setup:
+        if not self._has_setup:
             self.setup()
             self._has_setup = True
 
@@ -291,7 +291,7 @@ class MLPipe(object):
     def load(self):
         """Load saved models data to continue training"""
         # setup the models if not already setup
-        if self._has_setup:
+        if not self._has_setup:
             self.setup()
             self._has_setup = True
 

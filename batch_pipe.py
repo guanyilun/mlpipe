@@ -28,6 +28,7 @@ pipe.load_dataset('data/dataset_2d.h5', load_data=True)
 # add models to train and test together
 pipe.add_model(CNNModel())
 
+pipe.load()
 # excute the pipeline
 try:
     pipe.train()

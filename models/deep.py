@@ -138,6 +138,7 @@ class CNNModel(Model):
         torch.save(self.model, filename)
 
     def load(self, filename):
-        self.model.load_state_dict(torch.load(filename)).eval()
+        self.model = torch.load(filename)
+        self.model.eval()
         print("Saved model loaded!")
     
