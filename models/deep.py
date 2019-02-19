@@ -45,7 +45,11 @@ class NeuralNet(nn.Module):
             nn.MaxPool1d(kernel_size=3, stride=3),
         )
 
-        self.fc = nn.Linear(4490, 2)
+        self.fc = nn.Sequential(
+            nn.Linear(4490, 2245),
+            nn.ReLU(),
+            nn.Linear(2245, 2),
+        )
 
     def forward(self, tdata, fdata, features):
         tout = self.tdata_model(tdata)
@@ -78,7 +82,7 @@ class CNNModel(Model):
         self.model = NeuralNet().to(device)
 
         # Loss and optimizer
-        learning_rate = 0.01
+        learning_rate = 0.05
         self.criterion = nn.CrossEntropyLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
@@ -104,9 +108,11 @@ class CNNModel(Model):
         loss = self.criterion(outputs, labels)
 
         # Backward and optimize
+        print("Loss: %f" % float(loss.cpu()))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
 
     def validate(self, data, labels, metadata):
         gpu = self.device

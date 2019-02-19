@@ -17,10 +17,10 @@ pipe = MLPipe()
 
 # setup some pipeline parameters
 pipe.set_epochs(30)
-pipe.set_train_bias(good=2, bad=3)
+pipe.set_train_bias(good=1, bad=3)
 pipe.set_train_batch_size(1024)
 pipe.set_validate_batch_size(1024)
-pipe.set_validate_interval(1)
+pipe.set_validate_interval(100)
 
 # load dataset
 pipe.load_dataset('data/dataset_2d.h5', load_data=True)
@@ -29,7 +29,10 @@ pipe.load_dataset('data/dataset_2d.h5', load_data=True)
 pipe.add_model(CNNModel())
 
 # excute the pipeline
-pipe.train()
+try:
+    pipe.train()
+except KeyboardInterrupt:
+    print("Keyboardinterrupt received, saving models")
 
 # pipe.test()
 pipe.save()
