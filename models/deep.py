@@ -55,9 +55,15 @@ class NeuralNet(nn.Module):
         tout = self.tdata_model(tdata)
         fout = self.fdata_model(fdata)
 
+        # contract the channel dimensions
+        tout = torch.matmul(tout.transpose(1,2), tout)
+        fout = torch.matmul(fout.transpose(1,2), fout)
+
+        # flatten the output
         tout = tout.reshape(tout.size(0), -1)
         fout = fout.reshape(fout.size(0), -1)
 
+        # concat results from time, freq and engineered features
         out = torch.cat((tout,fout,features), dim=1)
         out = self.fc(out)
 
