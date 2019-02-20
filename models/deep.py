@@ -92,14 +92,19 @@ class CNNModel(Model):
     def train(self, data, labels, metadata):
         gpu = self.device
 
-        # Get input data and transform to torch tensor
-        tdata = torch.from_numpy(data[:, 0, None, ...]).type(torch.FloatTensor)
-        fdata = torch.from_numpy(data[:, 1, None, ...]).type(torch.FloatTensor)
-        labels = torch.from_numpy(labels)
-
+        # Get input data streams
+        tdata = data[:, 0, None, ...]
+        fdata = data[:, 1, None, ...]
+        
         # Apply some transformation to input data streams
-        tdata -= torch.mean(tdata)
-        fdata = torch.log(fdata)
+        tdata -= np.mean(tdata, axis=2)[..., None]
+        tdata *= 1E12
+        fdata = np.log(fdata)
+        
+        # and transform to torch tensor
+        tdata = torch.from_numpy(tdata).type(torch.FloatTensor)
+        fdata = torch.from_numpy(fdata).type(torch.FloatTensor)
+        labels = torch.from_numpy(labels)
 
         # Obtain engineered features
         features = np.hstack([metadata[key] for key in self.features])
@@ -114,7 +119,7 @@ class CNNModel(Model):
         loss = self.criterion(outputs, labels)
 
         # Backward and optimize
-        print("Loss: %f" % float(loss.cpu()))
+        print("Loss: %f" % float(loss))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -129,6 +134,7 @@ class CNNModel(Model):
 
         # Apply some transformation to input data streams
         tdata -= torch.mean(tdata)
+        tdata *= 1E12  # convert to pW
         fdata = torch.log(fdata)
         
         # Obtain engineered features
