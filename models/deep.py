@@ -97,8 +97,11 @@ class CNNModel(Model):
         fdata = torch.from_numpy(data[:, 1, None, ...]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
 
+        # Apply some transformation to input data streams
         tdata -= torch.mean(tdata)
-        
+        fdata = torch.log(fdata)
+
+        # Obtain engineered features
         features = np.hstack([metadata[key] for key in self.features])
         features = torch.from_numpy(features).type(torch.FloatTensor)
 
@@ -116,7 +119,6 @@ class CNNModel(Model):
         loss.backward()
         self.optimizer.step()
 
-
     def validate(self, data, labels, metadata):
         gpu = self.device
 
@@ -124,9 +126,12 @@ class CNNModel(Model):
         tdata = torch.from_numpy(data[:, 0, None, ...]).type(torch.FloatTensor)
         fdata = torch.from_numpy(data[:, 1, None, ...]).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
-        
+
+        # Apply some transformation to input data streams
         tdata -= torch.mean(tdata)
+        fdata = torch.log(fdata)
         
+        # Obtain engineered features
         features = np.hstack([metadata[key] for key in self.features])
         features = torch.from_numpy(features).type(torch.FloatTensor)
 

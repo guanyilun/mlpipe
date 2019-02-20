@@ -23,7 +23,7 @@ pipe.set_validate_batch_size(1024)
 pipe.set_validate_interval(100)
 
 # load dataset
-pipe.load_dataset('data/dataset_2d.h5', load_data=True)
+pipe.load_dataset('data/dataset.h5', load_data=True)
 
 # add models to train and test together
 pipe.add_model(CNNModel())
