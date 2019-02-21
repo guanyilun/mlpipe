@@ -46,9 +46,9 @@ class NeuralNet(nn.Module):
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(4490, 2245),
+            nn.Linear(35*35*2+10, 2000),
             nn.ReLU(),
-            nn.Linear(2245, 2),
+            nn.Linear(2000, 2),
         )
 
     def forward(self, tdata, fdata, features):
@@ -89,7 +89,7 @@ class CNNModel(Model):
         self.model = self.model.to(device)
 
         # Loss and optimizer
-        learning_rate = 0.01
+        learning_rate = 0.001
         self.criterion = nn.CrossEntropyLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
@@ -101,11 +101,6 @@ class CNNModel(Model):
         # Get input data streams
         tdata = data[:, 0, None, ...]
         fdata = data[:, 1, None, ...]
-        
-        # Apply some transformation to input data streams
-        tdata -= np.mean(tdata, axis=2)[..., None]
-        tdata *= 1E12
-        fdata = np.log(fdata)
         
         # and transform to torch tensor
         tdata = torch.from_numpy(tdata).type(torch.FloatTensor)
@@ -132,17 +127,16 @@ class CNNModel(Model):
 
     def validate(self, data, labels, metadata):
         gpu = self.device
-
-        # Get input data and transform to torch tensor
-        tdata = torch.from_numpy(data[:, 0, None, ...]).type(torch.FloatTensor)
-        fdata = torch.from_numpy(data[:, 1, None, ...]).type(torch.FloatTensor)
+        
+        # Get input data streams
+        tdata = data[:, 0, None, ...]
+        fdata = data[:, 1, None, ...]
+        
+        # Transform to torch tensor
+        tdata = torch.from_numpy(tdata).type(torch.FloatTensor)
+        fdata = torch.from_numpy(fdata).type(torch.FloatTensor)
         labels = torch.from_numpy(labels)
 
-        # Apply some transformation to input data streams
-        tdata -= torch.mean(tdata)
-        tdata *= 1E12  # convert to pW
-        fdata = torch.log(fdata)
-        
         # Obtain engineered features
         features = np.hstack([metadata[key] for key in self.features])
         features = torch.from_numpy(features).type(torch.FloatTensor)
@@ -154,7 +148,6 @@ class CNNModel(Model):
         outputs = self.model(tdata, fdata, features)
         _, predicted = torch.max(outputs, 1)
         return predicted.cpu().numpy(), None
-
 
     def save(self, filename):
         torch.save(self.model, filename)
