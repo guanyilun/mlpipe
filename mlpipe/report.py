@@ -78,7 +78,16 @@ class Report(object):
                 roc_ax.plot(fpr, tpr, label='{0} (area = {1:0.2f})'.format(model_name, roc_auc),
                             linestyle=':', linewidth=4)
                 roc_ax.set_xlabel("False Positive Rate")
-
+            if pr_ax:
+                truth_binarize = to_categorical(truth, 2)
+                precision, recall, _ = metrics.precision_recall_curve(
+                    truth_binarize.ravel(), proba.ravel())
+                average_precision = metrics.average_precision_score(truth_binarize,
+                                                                    proba,
+                                                                    average='micro')
+                pr_ax.plot(recall, precision,
+                           label='{0} (area = {1:0.3f})'.format(model_name, average_precision),
+                           linestyle=':', linewidth=4)
 
     def print_batch_report(self, epoch, batch):
         report = self.report
