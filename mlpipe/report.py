@@ -6,6 +6,7 @@ from tabulate import tabulate
 import os
 from matplotlib import pyplot as plt
 import scikitplot as skplt
+from .utils import to_categorical
 
 
 class Report(object):
@@ -18,7 +19,8 @@ class Report(object):
         self.output_dir = output_dir
             
 
-    def add_record(self, model_name, epoch, batch, predict, proba, truth, time_spent, plot=True):
+    def add_record(self, model_name, epoch, batch, predict, proba,
+                   truth, time_spent, plot=True, roc_ax=None, pr_ax=None):
         loss = metrics.log_loss(truth, predict)
         accuracy = metrics.accuracy_score(truth, predict)
         precision = metrics.precision_score(truth, predict)
@@ -59,10 +61,24 @@ class Report(object):
             print("Saving plot: %s" % filename)
             plt.savefig(filename)
 
+            # plot lift curve
             skplt.metrics.plot_lift_curve(truth, proba)
             filename = os.path.join(self.output_dir, "%s_lift_curve.png" % model_name)
             print("Saving plot: %s" % filename)
             plt.savefig(filename)
+
+            # if external ax is given, it means that we want to plot cross
+            # model performance comparison
+            if roc_ax:
+                # plot a cross model ROC curve, with only the micro average
+                # not the individual classes
+                truth_binarize = to_categorical(truth, 2)
+                fpr, tpr, _ = metrics.roc_curve(truth_binarize.ravel(), proba.ravel())
+                roc_auc = metrics.auc(fpr, tpr)
+                roc_ax.plot(fpr, tpr, label='{0} (area = {1:0.2f})'.format(model_name, roc_auc),
+                            linestyle=':', linewidth=4)
+                roc_ax.set_xlabel("False Positive Rate")
+
 
     def print_batch_report(self, epoch, batch):
         report = self.report

@@ -5,8 +5,8 @@ import time
 import os
 import torch
 from torch.utils.data import DataLoader
-from sklearn import metrics
 import numpy as np
+from matplotlib import pyplot as plt
 
 from .data import Dataset, truncate_collate
 from .report import Report
@@ -211,14 +211,28 @@ class MLPipe(object):
         y_truth = np.hstack(labels)
 
         print("Saving validation data...")
+        # Creating cross model roc and pr comparison plot
+        roc_fig, roc_ax = plt.subplots(1,1)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
             y_pred_proba = np.vstack(probas[name])
             time_spent = sum(time_dict[name])
             self._report.add_record(name, self._epoch, self._batch,
                                     y_pred, y_pred_proba, y_truth,
-                                    time_spent)
+                                    time_spent, roc_ax=roc_ax)
 
+        roc_ax.set_title("ROC Curves") 
+        roc_ax.set_xlabel("False Positive Rate")
+        roc_ax.set_ylabel("True Positive Rate")
+        roc_ax.plot([0, 1], [0, 1], 'k--', lw=2)
+        roc_ax.set_xlim([0.0, 1.0])
+        roc_ax.set_ylim([0.0, 1.05])
+        roc_ax.legend()
+        # saving roc plot
+        filename = os.path.join(self._output_dir, "all_roc_curve.png")
+        print("Saving plot: %s" % filename)
+        roc_fig.savefig(filename)
+        
         # print a intermediate result
         print('')
         print('== VALIDATION RESULTS: ==')
