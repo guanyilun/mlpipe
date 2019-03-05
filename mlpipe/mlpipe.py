@@ -213,14 +213,15 @@ class MLPipe(object):
         print("Saving validation data...")
         # Creating cross model roc and pr comparison plot
         roc_fig, roc_ax = plt.subplots(1,1)
+        pr_fig, pr_ax = plt.subplots(1,1)
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
             y_pred_proba = np.vstack(probas[name])
             time_spent = sum(time_dict[name])
             self._report.add_record(name, self._epoch, self._batch,
                                     y_pred, y_pred_proba, y_truth,
-                                    time_spent, roc_ax=roc_ax)
-
+                                    time_spent, roc_ax=roc_ax, pr_ax=pr_ax)
+        # Save ROC curves
         roc_ax.set_title("ROC Curves") 
         roc_ax.set_xlabel("False Positive Rate")
         roc_ax.set_ylabel("True Positive Rate")
@@ -228,10 +229,22 @@ class MLPipe(object):
         roc_ax.set_xlim([0.0, 1.0])
         roc_ax.set_ylim([0.0, 1.05])
         roc_ax.legend()
-        # saving roc plot
         filename = os.path.join(self._output_dir, "all_roc_curve.png")
         print("Saving plot: %s" % filename)
         roc_fig.savefig(filename)
+        plt.close(roc_fig)
+
+        # Save PR curves
+        pr_ax.set_title("Precision-Recall Curves") 
+        pr_ax.set_xlabel("Recall")
+        pr_ax.set_ylabel("Precision")
+        pr_ax.set_xlim([0.0, 1.0])
+        pr_ax.set_ylim([0.0, 1.05])
+        pr_ax.legend()
+        filename = os.path.join(self._output_dir, "all_pr_curve.png")
+        print("Saving plot: %s" % filename)
+        pr_fig.savefig(filename)
+        plt.close(pr_fig)
         
         # print a intermediate result
         print('')
