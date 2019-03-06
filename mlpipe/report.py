@@ -7,7 +7,7 @@ import os
 from matplotlib import pyplot as plt
 import scikitplot as skplt
 from .utils import to_categorical
-
+import cPickle as pickle
 
 
 class Report(object):
@@ -18,7 +18,6 @@ class Report(object):
 
         self.report = pd.DataFrame(columns=columns)
         self.output_dir = output_dir
-            
 
     def add_record(self, model_name, epoch, batch, predict, proba,
                    truth, time_spent, plot=True, roc_ax=None, pr_ax=None):
@@ -78,6 +77,19 @@ class Report(object):
                 roc_auc = metrics.auc(fpr, tpr)
                 roc_ax.plot(fpr, tpr, label='{0} (area = {1:0.2f})'.format(model_name, roc_auc),
                             linestyle='-', linewidth=2)
+
+                roc_param = {
+                    'name': model_name,
+                    'fpr': fpr,
+                    'tpr': tpr,
+                    'auc': roc_auc
+                }
+                # save the parameter used for external use
+                filename = os.path.join(self.output_dir, "%s_roc.pickle"%model_name)
+                print("Saving data: %s" % filename)
+                with open(filename, "wb") as f:
+                    pickle.dump(roc_param, f)
+
             if pr_ax:
                 # plot a cross model PR curve, with only the micro average
                 # not the individual classes
@@ -90,6 +102,18 @@ class Report(object):
                 pr_ax.plot(recall, precision,
                            label='{0} (area = {1:0.3f})'.format(model_name, average_precision),
                            linestyle='-', linewidth=2)
+
+                pr_param = {
+                    'name': model_name,
+                    'recall': recall,
+                    'precision': precision,
+                    'auc': average_precision
+                }
+                # save the parameter used for external use
+                filename = os.path.join(self.output_dir, "%s_pr.pickle"%model_name)
+                print("Saving data: %s" % filename)
+                with open(filename, "wb") as f:
+                    pickle.dump(pr_param, f)
 
     def print_batch_report(self, epoch, batch):
         report = self.report
