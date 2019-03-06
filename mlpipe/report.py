@@ -9,6 +9,7 @@ import scikitplot as skplt
 from .utils import to_categorical
 
 
+
 class Report(object):
     def __init__(self, output_dir="outputs"):
             
@@ -76,9 +77,10 @@ class Report(object):
                 fpr, tpr, _ = metrics.roc_curve(truth_binarize.ravel(), proba.ravel())
                 roc_auc = metrics.auc(fpr, tpr)
                 roc_ax.plot(fpr, tpr, label='{0} (area = {1:0.2f})'.format(model_name, roc_auc),
-                            linestyle=':', linewidth=4)
-                roc_ax.set_xlabel("False Positive Rate")
+                            linestyle='-', linewidth=2)
             if pr_ax:
+                # plot a cross model PR curve, with only the micro average
+                # not the individual classes
                 truth_binarize = to_categorical(truth, 2)
                 precision, recall, _ = metrics.precision_recall_curve(
                     truth_binarize.ravel(), proba.ravel())
@@ -87,7 +89,7 @@ class Report(object):
                                                                     average='micro')
                 pr_ax.plot(recall, precision,
                            label='{0} (area = {1:0.3f})'.format(model_name, average_precision),
-                           linestyle=':', linewidth=4)
+                           linestyle='-', linewidth=2)
 
     def print_batch_report(self, epoch, batch):
         report = self.report

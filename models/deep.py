@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 import numpy as np
 from mlpipe import Model
-
+import os
 
 class NeuralNet(nn.Module):
     def __init__(self):
@@ -146,14 +146,16 @@ class CNNModel(Model):
         labels, features = labels.to(gpu), features.to(gpu)
 
         outputs = self.model(tdata, fdata, features)
-        _, predicted = torch.max(outputs, 1)
-        return predicted.cpu().numpy(), None
+        probas = F.softmax(outputs)
+        _, predicted = torch.max(probas, 1)
+        return predicted.cpu().numpy(), probas.cpu().detach().numpy()
 
     def save(self, filename):
         torch.save(self.model, filename)
 
     def load(self, filename):
-        self.model = torch.load(filename)
-        self.model.eval()
-        print("Saved model loaded!")
+        if os.path.isfile(filename):
+            self.model = torch.load(filename)
+            self.model.eval()
+            print("Saved model loaded!")
     

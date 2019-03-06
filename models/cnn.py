@@ -78,9 +78,9 @@ class CNNModel(Model):
         labels = torch.from_numpy(labels)
         data, labels = data.to(gpu), labels.to(gpu)
         outputs = self.model(data)
-        _, predicted = torch.max(outputs, 1)
-        return predicted.cpu().numpy()
-
+        probas = F.softmax(outputs)
+        _, predicted = torch.max(probas, 1)
+        return predicted.cpu().numpy(), probas.cpu().detach().numpy()
 
     def save(self, filename):
         torch.save(self.model, filename)
