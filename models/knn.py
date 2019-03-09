@@ -15,7 +15,7 @@ class KNNModel(Model):
         self.name = '{}-{}'.format(self.name, n_neighbors)
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
                          'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
-                         'jumpLive', 'gainLive']
+                         'jumpLive', 'gainLive', 'feat1', 'feat2', 'feat3']
 
 
     def train(self, data, labels, metadata):
@@ -31,4 +31,3 @@ class KNNModel(Model):
     def save(self, filename):
         with open(filename, 'wb') as f:
             pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)
-

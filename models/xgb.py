@@ -14,7 +14,7 @@ class XGBModel(Model):
         self.model = XGBClassifier()
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
                          'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
-                         'jumpLive', 'gainLive']
+                         'jumpLive', 'gainLive', 'feat1', 'feat2', 'feat3']
 
     def train(self, data, labels, metadata):
         # gather all metadata to form the features

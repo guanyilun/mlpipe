@@ -5,25 +5,22 @@ import numpy as np
 
 
 class Dataset(data.Dataset):
-    'Wrapper for TOD data PyTorch'
+    """Wrapper for TOD data PyTorch"""
     def __init__(self, src, label, load_data=True):
-        'Initialization'
+        """Initialization"""
         self._label = label
         self._hf = h5py.File(src, 'r', swmr=True)
         self._group = self._hf[label]
         self._keys = self._group.keys()
         self._load_data = load_data
-
-        self.param_keys = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                           'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
-                           'jumpLive', 'gainLive']
+        self.param_keys = self._get_param_keys()
 
     def __len__(self):
         'Denotes the total number of samples'
         return len(self._keys)
 
     def __getitem__(self, index):
-        'Generates one sample of data'
+        """Generates one sample of data"""
         # select sample
         det_uid = self._keys[index]
 
@@ -45,6 +42,17 @@ class Dataset(data.Dataset):
         
         return X, params, y
 
+    def _get_param_keys(self, scalp=0):
+        """Retrieve a scalp data to get attrs"""
+        det_uid = self._keys[scalp]
+        
+        # load data and get label
+        dataset = self._group[det_uid]
+
+        # get all parameters that are not "label" which is reserved
+        # for truth
+        return [par for par in dataset.attrs.keys() if par != "label"]
+
     def get_sampler(self, good=1, bad=1):
         n_keys = len(self._keys)
 
@@ -60,7 +68,8 @@ class Dataset(data.Dataset):
         weights = map(lambda l: w_good if l == 1 else w_bad, labels)
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
-        
+
+    
 def truncate_collate(batch):
     """
     args:

@@ -22,7 +22,7 @@ class DecisionTreeModel(Model):
         self.model = DecisionTreeClassifier(random_state=random_state)
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
                          'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
-                         'jumpLive', 'gainLive']
+                         'jumpLive', 'gainLive', 'feat1', 'feat2', 'feat3']
 
     def train(self, data, labels, metadata):
         features = np.hstack([metadata[key] for key in self.features])

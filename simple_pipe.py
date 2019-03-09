@@ -33,17 +33,18 @@ pipe.set_train_bias(good=1, bad=1)
 # in this pipeline I will not need
 # the tod data
 # pipe.load_dataset('data/dataset.h5', load_data=False)
-pipe.load_dataset('data/dataset.h5', load_data=False)
+pipe.load_dataset('/mnt/act3/users/treu/cuts28Feb/act-cutflow-master/dataset_28Feb.h5',
+                  load_data=False)
 
 # add models to train and test together
 pipe.add_model(XGBModel())
 pipe.add_model(RFModel(n_estimators=5))
 pipe.add_model(RFModel(n_estimators=7))
-pipe.add_model(RFModel(n_estimators=11))
+pipe.add_model(RFModel(n_estimators=12))
 pipe.add_model(DecisionTreeModel())
 pipe.add_model(KNNModel(n_neighbors=5))
 pipe.add_model(KNNModel(n_neighbors=7))
-pipe.add_model(KNNModel(n_neighbors=11))
+pipe.add_model(KNNModel(n_neighbors=12))
 # excute the pipeline
 pipe.train()
 
