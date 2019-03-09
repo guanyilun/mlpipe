@@ -10,45 +10,45 @@ class NeuralNet(nn.Module):
         super(NeuralNet, self).__init__()
 
         self.tdata_model = nn.Sequential(
-            nn.Conv1d(1, 16, kernel_size=3),
+            nn.Conv1d(1, 16, kernel_size=16),
             nn.ReLU(),
-            nn.Conv1d(16, 16, kernel_size=3),
+            nn.Conv1d(16, 16, kernel_size=16),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=3, stride=3),
-            nn.Conv1d(16, 32, kernel_size=3),
+            nn.MaxPool1d(kernel_size=16, stride=3),
+            nn.Conv1d(16, 32, kernel_size=16),
             nn.ReLU(),
-            nn.Conv1d(32, 32, kernel_size=3),
+            nn.Conv1d(32, 32, kernel_size=16),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=3, stride=3),
-            nn.Conv1d(32, 64, kernel_size=3),
+            nn.MaxPool1d(kernel_size=16, stride=3),
+            nn.Conv1d(32, 64, kernel_size=16),
             nn.ReLU(),
-            nn.Conv1d(64, 64, kernel_size=3),
+            nn.Conv1d(64, 64, kernel_size=16),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=3, stride=3),
+            nn.MaxPool1d(kernel_size=16, stride=3),
         )
 
         self.fdata_model = nn.Sequential(
-            nn.Conv1d(1, 16, kernel_size=3),
+            nn.Conv1d(1, 16, kernel_size=16),
             nn.ReLU(),
-            nn.Conv1d(16, 16, kernel_size=3),
+            nn.Conv1d(16, 16, kernel_size=16),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=3, stride=3),
-            nn.Conv1d(16, 32, kernel_size=3),
+            nn.MaxPool1d(kernel_size=16, stride=3),
+            nn.Conv1d(16, 32, kernel_size=16),
             nn.ReLU(),
-            nn.Conv1d(32, 32, kernel_size=3),
+            nn.Conv1d(32, 32, kernel_size=16),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=3, stride=3),
-            nn.Conv1d(32, 64, kernel_size=3),
+            nn.MaxPool1d(kernel_size=16, stride=3),
+            nn.Conv1d(32, 64, kernel_size=16),
             nn.ReLU(),
-            nn.Conv1d(64, 64, kernel_size=3),
+            nn.Conv1d(64, 64, kernel_size=16),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=3, stride=3),
-        )
+            nn.MaxPool1d(kernel_size=16, stride=3),
+        )            
 
         self.fc = nn.Sequential(
-            nn.Linear(35*35*2+10, 2000),
+            nn.Linear(16*16*2+10, 256),
             nn.ReLU(),
-            nn.Linear(2000, 2),
+            nn.Linear(256, 2),
         )
 
     def forward(self, tdata, fdata, features):
@@ -74,11 +74,12 @@ class CNNModel(Model):
 
     name = 'DeepCNN'
 
-    def __init__(self):
+    def __init__(self, learning_rate=0.01):
         self.device = None
         self.model = None
         self.optimizer = None
         self.criterion = None
+        self.learning_rate = learning_rate
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
                          'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
                          'jumpLive', 'gainLive']
@@ -89,11 +90,11 @@ class CNNModel(Model):
         self.model = self.model.to(device)
 
         # Loss and optimizer
-        learning_rate = 0.001
+        learning_rate = 0.01
         self.criterion = nn.CrossEntropyLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
-                                          lr=learning_rate)
+                                          lr=self.learning_rate)
 
     def train(self, data, labels, metadata):
         gpu = self.device

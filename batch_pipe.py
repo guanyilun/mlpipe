@@ -17,7 +17,7 @@ pipe = MLPipe()
 
 # setup some pipeline parameters
 pipe.set_epochs(30)
-pipe.set_train_bias(good=1, bad=2.25)
+pipe.set_train_bias(good=1, bad=1)
 pipe.set_train_batch_size(1024)
 pipe.set_validate_batch_size(1024)
 pipe.set_validate_interval(100)
