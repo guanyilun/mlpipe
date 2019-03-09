@@ -27,7 +27,7 @@ class MLPipe(object):
         self._report = Report(output_dir=self._output_dir)
 
         # internal counter for epoch and batch id
-        self._epoch = 0  
+        self._epoch = 0
         self._batch = 0
 
         # sampling weight
@@ -57,9 +57,9 @@ class MLPipe(object):
 
     def set_validate_interval(self, interval):
         """Set how often do we run validation during training. For example,
-        a value of 100 (default value) means that after every 100 batches 
+        a value of 100 (default value) means that after every 100 batches
         we should run validation once. The result from the validation will
-        be automatically saved in the report for future analysis. 
+        be automatically saved in the report for future analysis.
 
         Params:
             interval: integer, number of batches
@@ -68,8 +68,8 @@ class MLPipe(object):
         self._validate_interval = int(interval)
 
     def set_train_bias(self, good, bad):
-        """Set a bias between good and bad samples used in the training. 
-        
+        """Set a bias between good and bad samples used in the training.
+
         Examples:
             set_train_bias(good=1, bad=3) means that bad detectors are sampled
             three times good detectors. (good 25%; bad 75%)
@@ -87,7 +87,7 @@ class MLPipe(object):
 
     def load_dataset(self, src, load_data=True):
         if os.path.isfile(src):
-            self._train_set = Dataset(src=src, label='train', 
+            self._train_set = Dataset(src=src, label='train',
                                       load_data=load_data)
             self._validate_set = Dataset(src=src, label='validate',
                                          load_data=load_data)
@@ -98,7 +98,7 @@ class MLPipe(object):
                                          load_data=load_data)
             except Exception:
                 print("WARNING: test data is not available!")
-                
+
             # retrieve parameter keys
             self._param_keys = self._train_set.param_keys
 
@@ -120,7 +120,7 @@ class MLPipe(object):
             print("Setting up model: %s" % name)
             model.setup(device)
 
-    def train(self):
+    def train(self, validate_plot=True):
         # automatically run setup if not ran already
         if not self._has_setup:
             self.setup()
@@ -132,11 +132,11 @@ class MLPipe(object):
             batch_size = len(self._train_set)
         else:
             batch_size = self._train_batch_size
-            
+
         # specify parameters used for train loader
         loader_params = {
             'batch_size': batch_size,
-            'sampler': self._train_set.get_sampler(good=self._good_weight, 
+            'sampler': self._train_set.get_sampler(good=self._good_weight,
                                                    bad=self._bad_weight),
             'collate_fn': self.collate_fn
         }
@@ -157,9 +157,9 @@ class MLPipe(object):
                     model.train(batch, label, metadata)
 
                 if i % self._validate_interval == 0:
-                    self.validate()
+                    self.validate(plot=validate_plot)
 
-    def validate(self):
+    def validate(self, dataset=None, plot=True, test=False):
         # check the batch size specified, 0 means do not use
         # batch training
         if self._validate_batch_size == 0:
@@ -172,12 +172,15 @@ class MLPipe(object):
             'shuffle': False,
             'collate_fn': self.collate_fn
         }
-        validate_loader = DataLoader(self._validate_set, **loader_params)
 
+        if not dataset:
+            validate_loader = DataLoader(self._validate_set, **loader_params)
+        else:
+            validate_loader = DataLoader(dataset, **loader_params)
         # initialize predictions to store the batch-wise predictions.
         # They will be merged together at the end. We also generate
         # a time_spent dictionary to store the time spend on each model
-        # batch-wise. These will also be merged together at the end. 
+        # batch-wise. These will also be merged together at the end.
         predictions = {}
         probas = {}
         time_dict = {}
@@ -188,7 +191,11 @@ class MLPipe(object):
 
         # initialize labels list to store all labels
         labels = []
-        print("Validating models...")
+        if test:
+            print("Testing models...")
+        else:
+            print("Validating models...")
+
         for batch, params, label in validate_loader:
             labels.append(label)
             for name in self._models.keys():
@@ -210,94 +217,68 @@ class MLPipe(object):
         # update performance dict and labels
         y_truth = np.hstack(labels)
 
-        print("Saving validation data...")
+        if test:
+            epoch = -1
+            batch = 0
+            print("Saving testing data...")
+        else:
+            epoch = self._epoch
+            batch = self._batch
+            print("Saving validation data...")
+
         # Creating cross model roc and pr comparison plot
-        roc_fig, roc_ax = plt.subplots(1,1)
-        pr_fig, pr_ax = plt.subplots(1,1)
+        if plot:
+            roc_fig, roc_ax = plt.subplots(1,1)
+            pr_fig, pr_ax = plt.subplots(1,1)
+        else:
+            roc_ax = pr_ax = None
+
         for name in self._models.keys():
             y_pred = np.hstack(predictions[name])
             y_pred_proba = np.vstack(probas[name])
             time_spent = sum(time_dict[name])
-            self._report.add_record(name, self._epoch, self._batch,
+            self._report.add_record(name, epoch, batch,
                                     y_pred, y_pred_proba, y_truth,
-                                    time_spent, roc_ax=roc_ax, pr_ax=pr_ax)
-        # Save ROC curves
-        roc_ax.set_title("ROC Curves")
-        roc_ax.set_xlabel("False Positive Rate")
-        roc_ax.set_ylabel("True Positive Rate")
-        roc_ax.plot([0, 1], [0, 1], 'k--', lw=2)
-        roc_ax.set_xlim([0.0, 1.0])
-        roc_ax.set_ylim([0.0, 1.05])
-        roc_ax.legend(loc='best', fontsize=12)
-        filename = os.path.join(self._output_dir, "all_roc_curve.png")
-        print("Saving plot: %s" % filename)
-        roc_fig.savefig(filename)
-        plt.close(roc_fig)
+                                    time_spent, plot=plot, roc_ax=roc_ax,
+                                    pr_ax=pr_ax)
 
-        # Save PR curves
-        pr_ax.set_title("Precision-Recall Curves") 
-        pr_ax.set_xlabel("Recall")
-        pr_ax.set_ylabel("Precision")
-        pr_ax.set_xlim([0.0, 1.0])
-        pr_ax.set_ylim([0.0, 1.05])
-        pr_ax.legend(loc='best', fontsize=12)
-        filename = os.path.join(self._output_dir, "all_pr_curve.png")
-        print("Saving plot: %s" % filename)
-        pr_fig.savefig(filename)
-        plt.close(pr_fig)
-        
+        if plot:
+            # Save ROC curves
+            roc_ax.set_title("ROC Curves")
+            roc_ax.set_xlabel("False Positive Rate")
+            roc_ax.set_ylabel("True Positive Rate")
+            roc_ax.plot([0, 1], [0, 1], 'k--', lw=2)
+            roc_ax.set_xlim([0.0, 1.0])
+            roc_ax.set_ylim([0.0, 1.05])
+            roc_ax.legend(loc='best', fontsize=12)
+            filename = os.path.join(self._output_dir, "all_roc_curve.png")
+            print("Saving plot: %s" % filename)
+            roc_fig.savefig(filename)
+            plt.close(roc_fig)
+
+            # Save PR curves
+            pr_ax.set_title("Precision-Recall Curves")
+            pr_ax.set_xlabel("Recall")
+            pr_ax.set_ylabel("Precision")
+            pr_ax.set_xlim([0.0, 1.0])
+            pr_ax.set_ylim([0.0, 1.05])
+            pr_ax.legend(loc='best', fontsize=12)
+            filename = os.path.join(self._output_dir, "all_pr_curve.png")
+            print("Saving plot: %s" % filename)
+            pr_fig.savefig(filename)
+            plt.close(pr_fig)
+
         # print a intermediate result
         print('')
-        print('== VALIDATION RESULTS: ==')
-        self._report.print_batch_report(self._epoch, self._batch)
+        if test:
+            print('== TEST RESULTS: ==')
+        else:
+            print('== VALIDATION RESULTS: ==')
+
+        self._report.print_batch_report(epoch, batch)
 
     def test(self):
-        loader_params = {
-            'batch_size': self._validate_batch_size,
-            'shuffle': False,
-            'collate_fn': self.collate_fn
-        }
-        test_loader = DataLoader(self._test_set, **loader_params)
-
-        # initialize predictions and time dict. similar to validation,
-        # we will save the result batch-wise
-        predictions = {}
-        probas = {}
-        time_dict = {}
-        for name in self._models.keys():
-            predictions[name] = []
-            time_dict[name] = []
-            probas[name] = []
-            
-        # initialize labels list to store all labels
-        labels = []
-        for batch, params, label in test_loader:
-            labels.append(label)
-            for name in self._models.keys():
-                model = self._models[name]
-                metadata = {}
-                for idx, k in enumerate(self._param_keys):
-                    metadata[k] = params[:, idx][:, None]
-
-                t_start = time.time()
-                prediction, proba = model.validate(batch, label, metadata)
-                time_spent = time.time() - t_start
-
-                predictions[name].append(prediction)
-                probas[name].append(proba)
-                time_dict[name].append(time_spent)
-
-        # update performance dict and labels
-        y_truth = np.hstack(labels)
-        for name in self._models.keys():
-            y_pred = np.hstack(predictions[name])
-            y_pred_proba = np.hstack(probas[name])
-            time_spent = sum(time_dict[name])
-            self._report.add_record(name, -1, 0, y_pred, y_pred_proba, y_truth, time_spent)
-
-        # print a intermediate result
-        print('== TEST RESULTS: ==')
-        self._report.print_batch_report(-1, 0)
+        self.validate(dataset=self._test_set, test=True)
 
     def save(self):
         # create folder if not existing
