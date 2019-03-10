@@ -25,7 +25,7 @@ args = parser.parse_args()
 
 input_file = args.input
 output_dir = args.output
-to_merge = args.merge
+# to_merge = args.merge
 
 ##################
 # util functions #
