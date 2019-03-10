@@ -3,6 +3,35 @@
 """This script dumps the metadata from a given h5 file
 and save them into pickle files for each group (train / test)
 respectively
+
+Example: 
+./dump_metadata.py -h
+usage: dump_metadata.py [-h] -i INPUT -o OUTPUT
+
+Dump the metadata of an h5 file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Input h5 file
+  -o OUTPUT, --output OUTPUT
+                        Output directory
+
+
+Example:
+./dump_metadata.py -i data/dataset.h5 -o tests
+
+Found fields: [u'DELive', u'MFELive', u'corrLive', u'darkRatioLive',
+u'feat1', u'feat2', u'feat3', u'feat5', u'gainLive', u'jumpDark',
+u'jumpLive', u'kurtLive', u'kurtpLive', u'label', u'normLive',
+u'rmsDark', u'rmsLive', u'skewLive', u'skewpLive']
+Found groups: [u'train', u'validate']
+Parsing group: train...
+-> Total number of entries: 24119
+Processed 1000/24119
+Processed 2000/24119
+...
+
 """
 
 import argparse
