@@ -3,7 +3,6 @@
 Machine Learning Pipeline for ACT
 
 * Dependencies
---------
 - python2.7 (I am still working on python 3 compatiblity)
 - pytorch
 - h5py
@@ -38,6 +37,7 @@ ln -s /mnt/act3/users/yilun/data/dataset.h5 .
 - Automatically generate pandas report and save it for post process
 - Expose GPU for easier GPU acceleration
 - Read data from an HDF5 file which is faster than from moby2 and more scalable
+- Automatically generate per model and cross-modal performance curves
 
 * Sample outputs
 To run a test script, you can run the following
@@ -75,9 +75,9 @@ This will produce the following output
        -1        0  SVCModel         1.42557   0.43809    0.958726  7319  8941   589   111     0.925518  0.985061  0.954362
        -1        0  RandomForest-10  0.686311  0.43809    0.98013   7426  9197   333     4     0.957082  0.999462  0.977813
 #+END_EXAMPLE
-     
+
 * Credits
 This package was created with Cookiecutter and the audreyr/cookiecutter-pypackage project template.
 
-Cookiecutter: https://github.com/audreyr/cookiecutter
-audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+- Cookiecutter: https://github.com/audreyr/cookiecutter
+- audreyr/cookiecutter-pypackage: https://github.com/audreyr/cookiecutter-pypackage
