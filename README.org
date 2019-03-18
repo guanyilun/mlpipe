@@ -1,78 +1,54 @@
-======
-MLPipe
-======
-
-
-.. image:: https://img.shields.io/travis/guanyilun/mlpipe.svg
-        :target: https://travis-ci.org/guanyilun/mlpipe
-
-.. image:: https://readthedocs.org/projects/mlpipe/badge/?version=latest
-        :target: https://mlpipe.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
-
-
+* MLPipe
 
 Machine Learning Pipeline for ACT
 
-
-* Free software: MIT license
-* Documentation: https://mlpipe.readthedocs.io.
-
-Dependencies
+* Dependencies
 --------
-* python2.7 (I am still working on python 3 compatiblity)
-* pytorch
-* h5py
-* pandas
-* tabulate
-* numpy
-* scikit-learn
-* scikit-plot
+- python2.7 (I am still working on python 3 compatiblity)
+- pytorch
+- h5py
+- pandas
+- tabulate
+- numpy
+- scikit-learn
+- scikit-plot
 
-Installation
---------
+* Installation
 
 To install torch please follow the platform specific instructions on 
 https://pytorch.org/
 
 The rest of dependencies can be installed by
 
-.. code-block:: bash
-
-   pip install -r requirements.txt
-
-The script assumes you have the required data file ``dataset.h5`` located at the ``data`` directory. On Feynman you can do the following - at the project root
-
-.. code-block:: bash
-
-   mkdir data
-   cd data
-   ln -s /mnt/act3/users/yilun/data/dataset.h5 .
+#+BEGIN_SRC bash
+pip install -r requirements.txt
+#+END_SRC
+The script assumes you have the required data file ~dataset.h5~ located at the ~data~ directory. On Feynman you can do the following - at the project root
+#+BEGIN_SRC bash
+mkdir data
+cd data
+ln -s /mnt/act3/users/yilun/data/dataset.h5 .
+#+END_SRC
    
-Features
---------
+* Features
+- Train and test machine learning models in a uniform way
+- Handles random sampling of detector data and pickle parameters
+- Build-in weighted sampler to ensure training data are balanced
+- Uniform metrics comparison of different models
+- Automatically generate pandas report and save it for post process
+- Expose GPU for easier GPU acceleration
+- Read data from an HDF5 file which is faster than from moby2 and more scalable
 
-* Train and test machine learning models in a uniform way
-* Handles random sampling of detector data and pickle parameters
-* Build-in weighted sampler to ensure training data are balanced
-* Uniform metrics comparison of different models
-* Automatically generate pandas report and save it for post process
-* Expose GPU for easier GPU acceleration
-* Read data from an HDF5 file which is faster than from moby2 and more scalable
-
-Sample outputs
--------
+* Sample outputs
 To run a test script, you can run the following
 
-.. code-block:: bash
-  
-   python simple_pipe.py
+#+BEGIN_SRC bash
+python simple_pipe.py
+#+END_SRC
    
 This will produce the following output
 
-.. code-block::
-
+#+BEGIN_EXAMPLE
   == VALIDATION RESULTS: ==
 
     epoch    batch  model               loss      base    accuracy    tp    tn    fp    fn    precision    recall        f1
@@ -98,11 +74,10 @@ This will produce the following output
        -1        0  RandomForest-20  0.688348  0.43809    0.980071  7427  9195   335     3     0.956841  0.999596  0.977751
        -1        0  SVCModel         1.42557   0.43809    0.958726  7319  8941   589   111     0.925518  0.985061  0.954362
        -1        0  RandomForest-10  0.686311  0.43809    0.98013   7426  9197   333     4     0.957082  0.999462  0.977813
+#+END_EXAMPLE
      
-Credits
--------
+* Credits
+This package was created with Cookiecutter and the audreyr/cookiecutter-pypackage project template.
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+Cookiecutter: https://github.com/audreyr/cookiecutter
+audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
