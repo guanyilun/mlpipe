@@ -33,7 +33,7 @@ pipe.set_train_bias(good=1, bad=1)
 # in this pipeline I will not need
 # the tod data
 # pipe.load_dataset('data/dataset.h5', load_data=False)
-pipe.load_dataset('/mnt/act3/users/yilun/work/act-cutflow/outputs/dataset.h5',
+pipe.load_dataset('data/dataset.h5',
                   load_data=False)
 
 # add models to train and test together

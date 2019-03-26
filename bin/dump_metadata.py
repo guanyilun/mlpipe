@@ -37,8 +37,12 @@ Processed 2000/24119
 import argparse
 import os, sys
 import h5py
-import cPickle
 import numpy as np
+
+try:
+    import pickle
+except ImportError:
+    import cPickle as pickle
 
 ###################
 # parse arguments #
@@ -119,6 +123,6 @@ for group_name in groups:
     filename = os.path.join(output_dir, "%s.pickle" % group_name)
     print("Saving to: %s..." % filename)
     with open(filename, "wb") as f:
-        cPickle.dump(output, f, 2)  # highest protocol
+        pickle.dump(output, f, 2)  # highest protocol
 
 print("Done!")

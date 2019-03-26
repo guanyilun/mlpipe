@@ -11,7 +11,7 @@ class Dataset(data.Dataset):
         self._label = label
         self._hf = h5py.File(src, 'r', swmr=True)
         self._group = self._hf[label]
-        self._keys = self._group.keys()
+        self._keys = list(self._group)
         self._load_data = load_data
         self.param_keys = self._get_param_keys()
 
@@ -65,7 +65,7 @@ class Dataset(data.Dataset):
         w_good = n_bad * 1.0 / n_keys * good_bias
         w_bad = n_good * 1.0 / n_keys * bad_bias
 
-        weights = map(lambda l: w_good if l == 1 else w_bad, labels)
+        weights = [(w_good if l == 1 else w_bad) for l in labels]
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
 
@@ -86,6 +86,6 @@ def truncate_collate(batch):
     # stack all
     X = np.stack(map(lambda x: x[0][..., :min_len], batch), axis=0)
     params = np.vstack(map(lambda x: x[1], batch))
-    y = np.array(map(lambda x: x[2], batch))
+    y = [x[2] for x in batch]
 
     return X, params, y
