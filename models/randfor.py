@@ -9,7 +9,11 @@ go using the data passed in to the Model.
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-import cPickle as pickle
+
+try:
+    import pickle
+except ImportError:
+    import cPickle as pickle
 
 from mlpipe import Model
 
