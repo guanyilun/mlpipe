@@ -1,6 +1,10 @@
 from xgboost import XGBClassifier
 import numpy as np
-import cPickle as pickle
+
+try:
+    import pickle
+except ImportError:
+    import cPickle as pickle
 
 from mlpipe import Model
 

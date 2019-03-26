@@ -7,8 +7,11 @@ import os
 from matplotlib import pyplot as plt
 import scikitplot as skplt
 from .utils import to_categorical
-import cPickle as pickle
 
+try:
+    import pickle
+except ImportError:
+    import cPickle as pickle
 
 class Report(object):
     def __init__(self, output_dir="outputs"):
