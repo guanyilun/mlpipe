@@ -11,7 +11,7 @@ class Dataset(data.Dataset):
         self._label = label
         self._hf = h5py.File(src, 'r', swmr=True)
         self._group = self._hf[label]
-        self._keys = self._group.keys()
+        self._keys = list(self._group)
         self._load_data = load_data
         self.param_keys = self._get_param_keys()
 
