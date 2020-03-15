@@ -5,13 +5,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
-
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
-requirements = ['Click>=6.0', 'scikit-plot']
+requirements = ['scikit-plot']
 
 setup_requirements = ['pytest-runner', ]
 
@@ -41,7 +35,6 @@ setup(
     },
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='mlpipe',
     name='mlpipe',

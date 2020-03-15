@@ -30,7 +30,7 @@ class Dataset(data.Dataset):
         # see if one needs data, if not X will simply be a placeholder
         if self._load_data:
             X = dataset[:]
-        else:  
+        else:
             X = np.array([0])
         # sort in specific order
         y = dataset.attrs['label']
@@ -39,13 +39,13 @@ class Dataset(data.Dataset):
         params = np.zeros(len(self.param_keys))
         for i, key in enumerate(self.param_keys):
             params[i] = dataset.attrs[key]
-        
+
         return X, params, y
 
     def _get_param_keys(self, scalp=0):
         """Retrieve a scalp data to get attrs"""
         det_uid = self._keys[scalp]
-        
+
         # load data and get label
         dataset = self._group[det_uid]
 
@@ -56,10 +56,10 @@ class Dataset(data.Dataset):
     def get_sampler(self, good=1, bad=1):
         n_keys = len(self._keys)
 
-        good_bias = good*2.0/(good+bad) 
+        good_bias = good*2.0/(good+bad)
         bad_bias = bad*2.0/(good+bad)
         labels = [self._group[self._keys[i]].attrs['label'] for i in range(n_keys)]
-        n_good = np.sum(labels) 
+        n_good = np.sum(labels)
         n_bad = n_keys - n_good
 
         w_good = n_bad * 1.0 / n_keys * good_bias
@@ -69,7 +69,7 @@ class Dataset(data.Dataset):
         sampler = data.sampler.WeightedRandomSampler(weights, n_keys)
         return sampler
 
-    
+
 def truncate_collate(batch):
     """
     args:
@@ -84,8 +84,8 @@ def truncate_collate(batch):
     min_len = min([b[0].shape[-1] for b in batch])
     # truncate according to min_len
     # stack all
-    X = np.stack(map(lambda x: x[0][..., :min_len], batch), axis=0)
-    params = np.vstack(map(lambda x: x[1], batch))
+    X = np.stack(list(map(lambda x: x[0][..., :min_len], batch)), axis=0)
+    params = np.vstack(list(map(lambda x: x[1], batch)))
     y = [x[2] for x in batch]
 
     return X, params, y

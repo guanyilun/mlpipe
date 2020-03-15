@@ -16,10 +16,10 @@ import matplotlib.style
 matplotlib.style.use("classic")
 
 from mlpipe import MLPipe
-from models.randfor import RFModel
-from models.tree import DecisionTreeModel
-from models.xgb import XGBModel
-from models.knn import KNNModel
+from mlpipe.models.randfor import RFModel
+from mlpipe.models.xgb import XGBModel
+# from mlpipe.models.tree import DecisionTreeModel
+# from mlpipe.models.knn import KNNModel
 
 pipe = MLPipe()
 
@@ -33,7 +33,7 @@ pipe.set_train_bias(good=1, bad=1)
 # in this pipeline I will not need
 # the tod data
 # pipe.load_dataset('data/dataset.h5', load_data=False)
-pipe.load_dataset('data/dataset.h5',
+pipe.load_dataset('data/dataset_new.h5',
                   load_data=False)
 
 # add models to train and test together
@@ -41,13 +41,11 @@ pipe.add_model(XGBModel())
 pipe.add_model(RFModel(n_estimators=5))
 pipe.add_model(RFModel(n_estimators=7))
 pipe.add_model(RFModel(n_estimators=12))
-pipe.add_model(DecisionTreeModel())
-pipe.add_model(KNNModel(n_neighbors=5))
-pipe.add_model(KNNModel(n_neighbors=7))
-pipe.add_model(KNNModel(n_neighbors=12))
+# pipe.add_model(KNNModel(n_neighbors=5))
+# pipe.add_model(KNNModel(n_neighbors=7))
+# pipe.add_model(KNNModel(n_neighbors=12))
 # excute the pipeline
 pipe.train()
-
 pipe.test()
 pipe.save()
 pipe.clean()

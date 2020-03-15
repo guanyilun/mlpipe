@@ -4,7 +4,7 @@ https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
 
 I am only using five pickle parameters as feaures, in principle
 more features can be used and one can also generate features on the
-go using the data passed in to the Model. 
+go using the data passed in to the Model.
 """
 
 import numpy as np
@@ -25,7 +25,7 @@ class SVCModel(Model):
     def __init__(self):
         self.model = SVC(gamma='auto')
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                         'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
+                         'MFELive', 'skewLive', 'normLive',
                          'jumpLive', 'gainLive']
 
     def train(self, data, labels, metadata):
@@ -36,7 +36,7 @@ class SVCModel(Model):
         features = np.hstack([metadata[key] for key in self.features])
         prediction = self.model.predict(features)
         return prediction
-    
+
     def save(self, filename):
         with open(filename, 'wb') as f:
             pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)

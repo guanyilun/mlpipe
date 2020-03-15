@@ -1,4 +1,4 @@
-from xgboost import XGBClassifier
+from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 
 try:
@@ -9,24 +9,25 @@ except ImportError:
 from mlpipe import Model
 
 
-class XGBModel(Model):
+class KNNModel(Model):
 
-    name = "XGBoost"
+    name = "KNNModel"
 
-    def __init__(self):
+    def __init__(self, n_neighbors=7):
         Model.__init__(self)
-        self.model = XGBClassifier()
+        self.model = KNeighborsClassifier(n_neighbors=n_neighbors)
+        self.name = '{}-{}'.format(self.name, n_neighbors)
         self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                         'MFELive', 'skewLive', 'normLive', 'darkRatioLive',
-                         'jumpLive', 'gainLive', 'feat1', 'feat2', 'feat3']
+                         'MFELive', 'skewLive', 'normLive',
+                         'jumpLive', 'gainLive',
+                         'psel', 'resp', 'respSel', 'cal',
+                         'ff','stable','alt','pwv']
 
     def train(self, data, labels, metadata):
-        # gather all metadata to form the features
         features = np.hstack([metadata[key] for key in self.features])
         self.model.fit(features, labels)
-    
+
     def validate(self, data, labels, metadata):
-        # gather all metadata to form the features
         features = np.hstack([metadata[key] for key in self.features])
         prediction = self.model.predict(features)
         prediction_proba = self.model.predict_proba(features)
@@ -35,4 +36,3 @@ class XGBModel(Model):
     def save(self, filename):
         with open(filename, 'wb') as f:
             pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)
-
