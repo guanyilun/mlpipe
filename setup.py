@@ -5,7 +5,14 @@
 
 from setuptools import setup, find_packages
 
-requirements = ['scikit-plot']
+requirements = ['scikit-plot',
+                'tabulate',
+                'pandas',
+                'numpy',
+                'h5py',
+                'xgboost',
+                'scikit-learn==0.20',
+                'inquirer']
 
 setup_requirements = ['pytest-runner', ]
 
@@ -34,6 +41,9 @@ setup(
         ],
     },
     install_requires=requirements,
+    scripts=['bin/inspect_dataset',
+             'bin/merge_datasets',
+             'bin/generate_tod_list'],
     license="MIT license",
     include_package_data=True,
     keywords='mlpipe',
