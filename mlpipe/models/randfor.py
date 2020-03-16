@@ -19,19 +19,17 @@ from mlpipe import Model
 
 
 class RFModel(Model):
-
-    name = "RandomForest"
-
-    def __init__(self, n_estimators=10, max_depth=5, random_state=0):
-        self.model = RandomForestClassifier(n_estimators=n_estimators,
-                                            max_depth=max_depth,
-                                            random_state=random_state)
-        self.name = self.name + '-' + str(n_estimators)
-        self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                         'MFELive', 'skewLive', 'normLive',
-                         'jumpLive', 'gainLive',
-                         'psel', 'resp', 'respSel', 'cal',
-                         'ff','stable','alt','pwv']
+    def __init__(self, name="RandomForest", features=[], **kwargs):
+        self.name = name
+        self.model = RandomForestClassifier(**kwargs)
+        if len(features) == 0:
+            self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
+                             'MFELive', 'skewLive', 'normLive',
+                             'jumpLive', 'gainLive',
+                             'psel', 'resp', 'respSel', 'cal',
+                             'ff','stable','alt','pwv']
+        else:
+            self.features = features
 
     def train(self, data, labels, metadata):
         features = np.hstack([metadata[key] for key in self.features])
@@ -45,4 +43,8 @@ class RFModel(Model):
 
     def save(self, filename):
         with open(filename, 'wb') as f:
-            pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def predict(self, features):
+        prediction = self.model.predict(features)
+        return prediction

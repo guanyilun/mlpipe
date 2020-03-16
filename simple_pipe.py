@@ -32,11 +32,20 @@ pipe.set_train_bias(good=1, bad=1)
 
 # in this pipeline I will not need
 # the tod data
-# pipe.load_dataset('data/dataset.h5', load_data=False)
-pipe.load_dataset('data/dataset_new.h5',
+pipe.load_dataset('./data/merged.h5',
                   load_data=False)
 
 # add models to train and test together
+pipe.add_model(XGBModel(name="XGBoost_tuned",
+                        scale_pos_weight=1,
+                        learning_rate=0.2,
+                        colsample_bytree=0.4,
+                        subsample=0.8,
+                        objective='binary:logistic',
+                        n_estimators=2000,
+                        reg_alpha=0.3,
+                        max_depth=4,
+                        gamma=10))
 pipe.add_model(XGBModel())
 pipe.add_model(RFModel(n_estimators=5))
 pipe.add_model(RFModel(n_estimators=7))
@@ -46,6 +55,6 @@ pipe.add_model(RFModel(n_estimators=12))
 # pipe.add_model(KNNModel(n_neighbors=12))
 # excute the pipeline
 pipe.train()
-pipe.test()
+# pipe.test()
 pipe.save()
 pipe.clean()
