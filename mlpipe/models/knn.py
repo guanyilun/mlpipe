@@ -11,17 +11,19 @@ from mlpipe import Model
 
 class KNNModel(Model):
 
-    name = "KNNModel"
 
-    def __init__(self, n_neighbors=7):
+    def __init__(self, name="KNNModel", features=[], **kwargs):
         Model.__init__(self)
-        self.model = KNeighborsClassifier(n_neighbors=n_neighbors)
-        self.name = '{}-{}'.format(self.name, n_neighbors)
-        self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                         'MFELive', 'skewLive', 'normLive',
-                         'jumpLive', 'gainLive',
-                         'psel', 'resp', 'respSel', 'cal',
-                         'ff','stable','alt','pwv']
+        self.name = name
+        if len(features) == 0:
+            self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
+                             'MFELive', 'skewLive', 'normLive',
+                             'jumpLive', 'gainLive',
+                             'psel', 'resp', 'respSel', 'cal',
+                             'ff','stable','alt','pwv']
+        else:
+            self.features = features
+        self.model = KNeighborsClassifier(**kwargs)
 
     def train(self, data, labels, metadata):
         features = np.hstack([metadata[key] for key in self.features])
@@ -35,4 +37,4 @@ class KNNModel(Model):
 
     def save(self, filename):
         with open(filename, 'wb') as f:
-            pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)

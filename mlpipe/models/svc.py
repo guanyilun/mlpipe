@@ -19,14 +19,18 @@ from mlpipe import Model
 
 
 class SVCModel(Model):
-
-    name = "SVCModel"
-
-    def __init__(self):
-        self.model = SVC(gamma='auto')
-        self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
-                         'MFELive', 'skewLive', 'normLive',
-                         'jumpLive', 'gainLive']
+    def __init__(self, name="SVCModel", features=[], **kwargs):
+        Model.__init__(self)
+        self.name = name
+        if len(features) == 0:
+            self.features = ['corrLive', 'rmsLive', 'kurtLive', 'DELive',
+                             'MFELive', 'skewLive', 'normLive',
+                             'jumpLive', 'gainLive',
+                             'psel', 'resp', 'respSel', 'cal',
+                             'ff','stable','alt','pwv']
+        else:
+            self.features = features
+        self.model = SVC(**kwargs)
 
     def train(self, data, labels, metadata):
         features = np.hstack([metadata[key] for key in self.features])
@@ -39,4 +43,4 @@ class SVCModel(Model):
 
     def save(self, filename):
         with open(filename, 'wb') as f:
-            pickle.dump(self.model, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)

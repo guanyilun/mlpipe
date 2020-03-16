@@ -42,19 +42,22 @@ pipe.add_model(XGBModel(name="XGBoost_tuned",
                         colsample_bytree=0.4,
                         subsample=0.8,
                         objective='binary:logistic',
-                        n_estimators=2000,
+                        n_estimators=5000,
                         reg_alpha=0.3,
                         max_depth=4,
                         gamma=10))
 pipe.add_model(XGBModel())
-pipe.add_model(RFModel(n_estimators=5))
-pipe.add_model(RFModel(n_estimators=7))
-pipe.add_model(RFModel(n_estimators=12))
-# pipe.add_model(KNNModel(n_neighbors=5))
-# pipe.add_model(KNNModel(n_neighbors=7))
-# pipe.add_model(KNNModel(n_neighbors=12))
+pipe.add_model(RFModel(name="RF-5",
+                       n_estimators=5))
+pipe.add_model(RFModel(name="RF-7",
+                       n_estimators=7))
+pipe.add_model(RFModel(name="RF-12",
+                       n_estimators=12))
+
 # excute the pipeline
 pipe.train()
-# pipe.test()
-pipe.save()
+
+# only test after fine tuning
+pipe.test()
+# pipe.save()
 pipe.clean()
